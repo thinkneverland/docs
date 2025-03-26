@@ -1,0 +1,26 @@
+{
+    "title": "Think Neverland Documentation",
+    "description": "Documentation for all Think Neverland packages",
+    "language": "en",
+    "plugins": [
+        "theme-api",
+        "search",
+        "expandable-chapters",
+        "back-to-top-button",
+        "copy-code-button"
+    ],
+    "pluginsConfig": {
+        "theme-api": {
+            "theme": "dark"
+        },
+        "search": {
+            "maxIndexSize": 100000,
+            "fuzzy": true
+        }
+    },
+    "gitbook": "3.2.3",
+    "structure": {
+        "readme": "README.md",
+        "summary": "SUMMARY.md"
+    }
+}
