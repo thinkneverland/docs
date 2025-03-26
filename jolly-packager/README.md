@@ -1,100 +1,68 @@
-# 🏴‍☠️ JollyPackager
+# 🏴‍☠️ Jolly Packager
 
-JollyPackager is your trusty companion in the vast seas of Laravel package development. This magical tool combines the power of package generation with the art of documentation, all wrapped in a whimsical pirate theme inspired by Neverland's finest.
+Jolly Packager is a Laravel package that helps you create and document Laravel packages with a pirate's flair! It provides powerful tools for generating package structures and comprehensive documentation.
 
-## Overview
-
-JollyPackager serves two main purposes:
-
-1. Creating fully-structured Laravel packages with all necessary boilerplate
-2. Generating comprehensive documentation for Laravel projects and packages
-
-## Key Features
+## 🎯 Key Features
 
 ### Package Generation
 
-- 📦 **Complete Package Structure**
-  - Automatic PSR-4 autoloading configuration
-  - Ready-to-use package skeleton
-  - Git repository initialization
-  - Composer.json setup
-
-- 🚀 **Quick Setup**
-  - Single command package creation
-  - Customizable templates
-  - Best practices included
-  - Laravel integration ready
+- **Complete Package Structure**: Creates a fully configured Laravel package
+- **Composer Integration**: Generates `composer.json` with proper configuration
+- **Service Provider**: Creates a service provider with basic setup
+- **Git Integration**: Initializes git repository with `.gitignore`
+- **Directory Structure**: Creates standard Laravel package directories
 
 ### Documentation Generation
 
-- 📚 **Comprehensive Scanning**
+- **Comprehensive Docs**: Generates detailed documentation for your codebase
+- **Multiple Formats**: Supports various documentation types:
   - Controllers
   - Models
   - Routes
-  - Migrations
-  - Views
-  - Blade Components
-  - Traits
-  - Interfaces
+  - Components
+- **Custom Templates**: Uses customizable documentation templates
+- **Exclusion Patterns**: Allows excluding specific directories and files
 
-- 🎨 **Beautiful Output**
-  - Structured Markdown documentation
-  - Code examples
-  - Cross-references
-  - Navigation structure
-
-### Developer Experience
-
-- ⚡ **Efficiency**
-  - Automated boilerplate generation
-  - Time-saving documentation
-  - Standardized structure
-
-- 🛠️ **Customization**
-  - Configurable templates
-  - Custom stubs support
-  - Flexible output formats
-
-## Generated Documentation Structure
-
-```
-docs/
-├── README.md
-├── controllers/
-│   └── [ControllerName].md
-├── models/
-│   └── [ModelName].md
-├── routes/
-│   └── api.md
-│   └── web.md
-└── components/
-    └── [ComponentName].md
-```
-
-## Generated Package Structure
-
-```
-vendor/
-└── package-name/
-    ├── src/
-    │   ├── PackageNameServiceProvider.php
-    │   └── Console/
-    │       └── Commands/
-    ├── config/
-    ├── database/
-    ├── resources/
-    ├── routes/
-    ├── tests/
-    ├── composer.json
-    └── README.md
-```
-
-## System Requirements
+## 🔧 System Requirements
 
 - PHP 8.1 or higher
-- Laravel 10.x
+- Laravel 10.0 or higher
 - Composer
 
-## License
+## 🚀 Quick Start
 
-JollyPackager is open-source software licensed under the MIT license.
+1. Install via Composer:
+
+```bash
+composer require thinkneverland/jollypackager
+```
+
+2. Publish the configuration:
+
+```bash
+php artisan vendor:publish --tag=config
+```
+
+3. Create a new package:
+
+```bash
+php artisan jolly:make vendor package
+```
+
+4. Generate documentation:
+
+```bash
+php artisan jolly:docs app --output=docs
+```
+
+## 📚 Documentation
+
+For detailed documentation, please visit our [GitBook documentation](https://thinkneverland.gitbook.io/jolly-packager/).
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](contributing.md) for details on our code of conduct and the process for submitting pull requests.
+
+## 📄 License
+
+Jolly Packager is open-source software licensed under the MIT license. See the [LICENSE](LICENSE.md) file for more details.

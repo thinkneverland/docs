@@ -40,6 +40,8 @@ The configuration file `config/flightcheck.php` contains all the settings for Fl
         'uncoated' => 240,
     ],
     'auto_convert_rgb' => true,
+    'check_rich_black' => true,
+    'check_overprint' => true,
 ],
 ```
 
@@ -51,6 +53,7 @@ The configuration file `config/flightcheck.php` contains all the settings for Fl
     'min_bleed_inches' => 0.125,
     'safe_margin_mm' => 6,
     'safe_margin_inches' => 0.25,
+    'check_trim_marks' => true,
 ],
 ```
 
@@ -132,19 +135,47 @@ $reports = FlightCheck::batchCheck($files);
         "required_dpi": 300,
         "status": "pass"
     },
+    "color": {
+        "modes": ["CMYK"],
+        "ink_coverage": {
+            "coated": 280,
+            "uncoated": 260
+        },
+        "rgb_detected": false,
+        "spot_colors": []
+    },
+    "fonts": {
+        "embedded": ["Helvetica", "Arial"],
+        "missing": [],
+        "sizes": {
+            "min_positive": 6,
+            "min_reversed": 8
+        }
+    },
     "dielines": [
         {
             "color": "Dieline",
             "stroke_width_mm": 0.25,
+            "stroke_width_inches": 0.01,
+            "stroke_center_mm": {
+                "x": 105,
+                "y": 148.5
+            },
+            "stroke_edges_mm": {
+                "outer_x": 106.25,
+                "outer_y": 149.75
+            },
             "dimensions": {
                 "width_mm": 210,
-                "height_mm": 297
+                "height_mm": 297,
+                "width_inches": 8.27,
+                "height_inches": 11.69
             }
         }
     ],
     "issues": [
         {
-            "message": "RGB images found",
+            "message": "Ink coverage exceeds limit for uncoated paper",
             "severity": "warning",
             "category": "color"
         }
@@ -182,24 +213,28 @@ $correctionReport = FlightCheck::applyCorrections(
 
 1. **File Preparation**
    - Use appropriate color spaces (CMYK/Spot)
-   - Ensure proper resolution
-   - Include necessary bleed
+   - Ensure proper resolution (300 DPI for images, 1200 DPI for line art)
+   - Include necessary bleed (3mm/0.125")
    - Embed all fonts
+   - Set appropriate safety margins (6mm/0.25")
 
 2. **Configuration**
-   - Set appropriate thresholds
-   - Configure error levels
-   - Customize for your workflow
+   - Set appropriate thresholds for your print method
+   - Configure error levels based on your requirements
+   - Customize settings for your specific workflow
+   - Enable auto-corrections where appropriate
 
 3. **Processing**
    - Use batch processing for multiple files
-   - Implement error handling
-   - Clean up temporary files
+   - Implement proper error handling
+   - Clean up temporary files after processing
+   - Monitor processing timeouts
 
 4. **Integration**
-   - Use appropriate storage options
+   - Use appropriate storage options (local/S3)
    - Implement proper security measures
    - Handle reports appropriately
+   - Set up monitoring and logging
 
 ## Troubleshooting
 
@@ -209,20 +244,23 @@ $correctionReport = FlightCheck::applyCorrections(
    - Check file permissions
    - Verify S3 credentials
    - Ensure valid URLs
+   - Check disk space
 
 2. **Processing Errors**
    - Check file format compatibility
    - Verify Imagick installation
    - Check memory limits
+   - Monitor processing timeouts
 
 3. **Report Issues**
    - Verify configuration settings
    - Check error thresholds
    - Review format specifications
+   - Validate output formats
 
 ## Next Steps
 
 - Explore the [API Reference](./api-reference.md)
-- Learn about [Advanced Features](./advanced-features.md)
-- Review [Configuration Options](./configuration.md)
-- Check [Security Best Practices](./security.md)
+- Learn about [Configuration Options](./configuration.md)
+- Review [Security Best Practices](./security.md)
+- Check [Contributing Guidelines](../CONTRIBUTING.md)

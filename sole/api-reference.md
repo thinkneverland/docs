@@ -1,325 +1,267 @@
-# Sole API Reference
+# API Reference
 
-This document provides detailed information about Sole's API, including components, services, and configuration options.
+This document provides detailed information about Sole's API, including component structure, directives, and available methods.
 
-## Core Classes
+## Component Structure
 
-### SoleManager
-
-The main class responsible for managing components and rendering.
-
-```php
-use ThinkNeverland\Sole\SoleManager;
-
-public function __construct($app)
-{
-    $this->app = $app;
-}
-```
-
-#### Methods
-
-- `render($component, $props = [])`: Render a component with optional props
-- `parseComponent($path)`: Parse a .sole file into its sections
-- `wrapPhpCode($code, $state)`: Prepare PHP code for execution
-
-### SoleComponent
-
-Base component class that provides core functionality.
-
-```php
-class SoleComponent
-{
-    public $element;
-    public $props;
-    public $behaviors;
-    public $pollTimers;
-    public $rateLimit;
-}
-```
-
-#### Properties
-
-- `element`: The component's DOM element
-- `props`: Component properties
-- `behaviors`: Attached behaviors
-- `pollTimers`: Active polling timers
-- `rateLimit`: Rate limiting configuration
-
-#### Methods
-
-- `dispatch(eventName, detail)`: Dispatch a component event
-- `startPolling(endpoint, interval, callback)`: Start polling an endpoint
-- `stopPolling(endpoint)`: Stop polling an endpoint
-
-## Services
-
-### SoleTranslator
-
-Handles internationalization and translations.
-
-```php
-use ThinkNeverland\Sole\I18n\SoleTranslator;
-
-class SoleTranslator
-{
-    protected string $locale;
-    protected string $fallbackLocale;
-    protected array $translations = [];
-    protected array $componentTranslations = [];
-}
-```
-
-#### Methods
-
-- `setLocale(string $locale)`: Set the current locale
-- `registerComponentTranslations(string $component, array $translations)`: Register translations
-- `translate(string $key, array $replace = [])`: Get a translation
-
-### FileUploadBehavior
-
-Handles file uploads with progress tracking and validation.
-
-```php
-class FileUploadBehavior implements Behavior
-{
-    protected $maxFileSize;
-    protected $allowedTypes;
-}
-```
-
-#### Methods
-
-- `handleFiles(FileList $files)`: Process uploaded files
-- `validateFile(File $file)`: Validate a file
-- `uploadFile(File $file)`: Upload a file
-
-## Configuration
-
-### Main Configuration (config/sole.php)
-
-```php
-return [
-    // Debug Mode
-    'debug' => env('SOLE_DEBUG', false),
-    
-    // Debug Options
-    'debug_options' => [
-        'lifecycle' => true,
-        'state' => true,
-        'network' => true,
-        'performance' => true,
-        'dom' => true,
-        'events' => true,
-        'stack_traces' => true,
-    ],
-    
-    // Internationalization
-    'i18n' => [
-        'locale' => 'en',
-        'fallback_locale' => 'en',
-        'cache_time' => 60 * 24, // minutes
-    ],
-    
-    // Progressive Web App
-    'pwa' => [
-        'enabled' => true,
-        'cache_version' => 'v1',
-        'offline_page' => '/offline.html',
-    ],
-];
-```
-
-## Component Lifecycle
-
-### Lifecycle Hooks
-
-```php
-// Called when component is first mounted
-function mount() {}
-
-// Called before state updates
-function updating($property, $value) {}
-
-// Called after state updates
-function updated($property, $value) {}
-
-// Called before component is destroyed
-function destroy() {}
-```
-
-## Events
-
-### Component Events
-
-```php
-// Dispatch an event
-$this->dispatch('custom-event', ['data' => 'value']);
-
-// Listen for an event
-$this->on('custom-event', function($data) {
-    // Handle event
-});
-```
-
-### System Events
-
-- `sole:mounted`: Component mounted
-- `sole:updated`: State updated
-- `sole:destroyed`: Component destroyed
-- `sole:error`: Error occurred
-
-## TypeScript Support
-
-### Type Definitions
-
-```typescript
-declare namespace Sole {
-    interface ComponentProps {
-        [key: string]: string;
-    }
-
-    interface EventPayload {
-        type: string;
-        data: any;
-        source: string;
-    }
-
-    interface UploadProgress {
-        loaded: number;
-        total: number;
-        percentage: number;
-    }
-}
-```
-
-## Behaviors
-
-### Available Behaviors
-
-1. **Interactive Behavior**
+### Template Section
 
 ```html
-<div clickable hover>
-    <!-- Content -->
-</div>
-```
-
-2. **Collapsible Behavior**
-
-```html
-<div class="sole-collapsible">
-    <button class="sole-collapsible-trigger">Toggle</button>
-    <div class="sole-collapsible-content">
-        <!-- Content -->
+<template>
+    <!-- Your component's HTML here -->
+    <div>
+        <h2>{{ $state->title }}</h2>
+        <button click="handleClick">Click me</button>
     </div>
+</template>
+```
+
+### PHP Section
+
+```php
+<?php
+// Component logic here
+function mount() {
+    // Initialization
+}
+
+function handleClick() {
+    // Event handling
+}
+?>
+```
+
+### Style Section
+
+```html
+<style scoped>
+/* Component-specific styles */
+</style>
+```
+
+## Directives
+
+### Template Directives
+
+#### Model Binding
+
+```html
+<input type="text" model="name">
+<textarea model="description"></textarea>
+<select model="category">
+    <option value="1">Option 1</option>
+    <option value="2">Option 2</option>
+</select>
+```
+
+#### Event Handling
+
+```html
+<button click="handleClick">Click</button>
+<input change="handleChange">
+<form submit="handleSubmit">
+```
+
+#### Conditional Rendering
+
+```html
+<div show="$state->isVisible">
+    <!-- Content shown when isVisible is true -->
+</div>
+
+<div hide="$state->isHidden">
+    <!-- Content hidden when isHidden is true -->
+</div>
+
+<div if="$state->count > 0">
+    <!-- Content shown when count is greater than 0 -->
 </div>
 ```
 
-3. **Input Behavior**
+#### Loops
 
 ```html
-<input type="text" clearable>
-```
+<ul>
+    @foreach($state->items as $item)
+        <li>{{ $item->name }}</li>
+    @endforeach
+</ul>
 
-4. **Selection Behavior**
-
-```html
-<div selectable>
-    <div role="option">Item 1</div>
-    <div role="option">Item 2</div>
+<div repeat="$state->count">
+    <p>Repeated {{ $index + 1 }} times</p>
 </div>
 ```
 
-## Security
+#### File Upload
 
-### CSRF Protection
-
-CSRF protection is automatically enabled for all component requests.
-
-### File Upload Security
-
-```php
-'upload' => [
-    'max_size' => 50 * 1024 * 1024, // 50MB
-    'allowed_types' => [
-        'image/jpeg',
-        'image/png',
-        'application/pdf'
-    ],
-    'storage' => [
-        'disk' => 'public',
-        'path' => 'uploads'
-    ]
-]
+```html
+<input type="file" upload="handleUpload">
+<input type="file" upload="handleUpload" :max-size="5242880">
+<input type="file" upload="handleUpload" :allowed-types="['image/jpeg', 'image/png']">
 ```
 
-### Authorization
+#### Real-time Updates
+
+```html
+<div refresh="30s">
+    <!-- Content refreshed every 30 seconds -->
+</div>
+
+<div refresh="1m">
+    <!-- Content refreshed every minute -->
+</div>
+```
+
+### Component Methods
+
+#### Lifecycle Hooks
 
 ```php
-protected $middleware = ['sole.auth'];
+function mount() {
+    // Called when component is first mounted
+}
 
-public function authorize()
-{
-    return auth()->user()->can('view', $this->model);
+function updating($property, $value) {
+    // Called before state updates
+}
+
+function updated($property, $value) {
+    // Called after state updates
+}
+
+function unmount() {
+    // Called when component is unmounted
 }
 ```
 
-## Progressive Web App
-
-### Service Worker
-
-```javascript
-// public/sole-service-worker.js
-const CACHE_NAME = 'sole-cache-v1';
-const RUNTIME_CACHE = 'sole-runtime';
-
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(PRECACHE_URLS))
-    );
-});
-```
-
-### Offline Support
-
-```html
-<div offline-capable>
-    <!-- This content will work offline -->
-</div>
-```
-
-## Testing
-
-### Component Testing
+#### State Management
 
 ```php
-use ThinkNeverland\Sole\Testing\SoleTester;
+// Initialize state
+$state->property = 'value';
 
-class CounterTest extends TestCase
+// Define computed property
+$this->defineComputed('total', function() {
+    return $state->price * $state->quantity;
+}, ['price', 'quantity']);
+
+// Use shared state
+$this->useSharedState('cart');
+
+// Enable state history
+$this->enableHistory(['count'], 10);
+```
+
+#### File Upload
+
+```php
+function handleUpload($file) {
+    $this->upload($file, function($progress) {
+        $state->progress = $progress;
+    })->then(function($response) {
+        $state->uploading = false;
+    });
+}
+```
+
+#### Real-time Updates
+
+```php
+function refresh() {
+    $state->items = Item::latest()->get();
+    $state->timestamp = now();
+}
+```
+
+#### Event Handling
+
+```php
+function handleClick() {
+    $state->count++;
+}
+
+function handleChange($event) {
+    $state->value = $event->target->value;
+}
+
+function handleSubmit($event) {
+    $event->preventDefault();
+    // Handle form submission
+}
+```
+
+## Component Configuration
+
+### Basic Configuration
+
+```php
+class Counter extends Component
 {
-    public function test_counter_increments()
-    {
-        $component = SoleTester::component('counter')
-            ->withState(['count' => 0])
-            ->render();
-        
-        $component->click('button');
-        
-        $component->assertSee('Count: 1');
-        $component->assertStateEquals('count', 1);
+    protected $props = [
+        'title' => 'Counter',
+        'initialCount' => 0
+    ];
+    
+    protected $state = [
+        'count' => 0
+    ];
+}
+```
+
+### Advanced Configuration
+
+```php
+class UserProfile extends Component
+{
+    protected $props = [
+        'userId' => null,
+        'showEmail' => true
+    ];
+    
+    protected $state = [
+        'user' => null,
+        'loading' => false,
+        'error' => null
+    ];
+    
+    protected $computed = [
+        'fullName' => function() {
+            return "{$state->user->first_name} {$state->user->last_name}";
+        }
+    ];
+    
+    protected $watchers = [
+        'userId' => function($value) {
+            $this->loadUser($value);
+        }
+    ];
+}
+```
+
+## Error Handling
+
+### Validation Errors
+
+```php
+function validate() {
+    if (empty($state->name)) {
+        $this->addError('name', 'Name is required');
     }
 }
 ```
 
-### Available Assertions
+### API Errors
 
-- `assertSee($text)`
-- `assertDontSee($text)`
-- `assertStateEquals($key, $value)`
-- `assertEventDispatched($event)`
-- `assertHasClass($class)`
-- `assertVisible()`
-- `assertHidden()`
-- `assertAccessible()`
+```php
+function handleError($error) {
+    $state->error = $error->getMessage();
+    $this->notify('error', 'An error occurred');
+}
+```
+
+## Next Steps
+
+- Learn about [Advanced Features](advanced-features.md)
+- Review [Best Practices](best-practices.md)
+- Check out [Examples](examples.md)
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/sole/) for more resources

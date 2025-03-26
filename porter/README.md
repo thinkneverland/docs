@@ -1,68 +1,74 @@
-# Porter
+# 🚢 Porter
 
-Porter is a powerful Laravel package designed to streamline database export, import, and S3 bucket management operations. It provides a robust set of tools for handling data migration and backup tasks with built-in support for data anonymization and selective export.
+Porter is a powerful Laravel package that enables seamless database and S3 bucket management through export, import, and cloning operations. It provides a flexible and secure way to handle data transfers between environments.
 
-## Overview
+## 🎯 Key Features
 
-Porter simplifies complex data operations in Laravel applications by providing:
+### Database Management
 
-- Database export with customizable data anonymization
-- Database import with optimized streaming
-- S3 bucket cloning with intelligent caching
-- Support for multiple S3 configurations
-- Model-level control over data handling
+- **Export**: Create SQL dumps with customizable options
+- **Import**: Import SQL files from local or S3 storage
+- **Smart Configuration**: Model-based data handling
+- **Expiration Control**: Automatic file cleanup
 
-## Key Features
+### S3 Integration
 
-### Database Operations
+- **Bucket Cloning**: Transfer files between S3 buckets
+- **Multiple Storage**: Support for primary and alternative S3 buckets
+- **Multipart Uploads**: Efficient handling of large files
+- **Custom Endpoints**: Support for custom S3-compatible services
 
-- Export database to SQL files with optional data anonymization
-- Import SQL files with optimized streaming and chunk processing
-- Support for both local and S3 storage
-- Configurable data retention and expiration
-- Automatic handling of database structure and relationships
+### Security
 
-### S3 Management
+- **Data Anonymization**: Randomize sensitive data during export
+- **Selective Export**: Control which models and fields to include
+- **IAM Integration**: Secure AWS credentials management
+- **Temporary Links**: Expiring download URLs for exports
 
-- Clone contents between S3 buckets
-- Support for multiple S3 configurations
-- Intelligent caching for file existence checks
-- Retry mechanisms for failed transfers
-- Progress tracking and detailed reporting
-
-### Data Protection
-
-- Model-level control over data anonymization
-- Smart field type detection
-- Configurable data retention
-- Secure handling of sensitive information
-- Support for data masking and randomization
-
-### Developer Experience
-
-- Simple and intuitive command-line interface
-- Extensive configuration options
-- Clear and detailed error reporting
-- Progress indicators for long-running operations
-- Comprehensive logging and debugging tools
-
-## System Requirements
+## 🔧 System Requirements
 
 - PHP 8.1 or higher
-- Laravel 10.x or 11.x
-- AWS SDK for PHP
-- Composer for dependency management
+- Laravel 10.0 or higher
+- MySQL/MariaDB database
+- AWS S3 compatible storage (optional)
 
-## Documentation Structure
+## 🚀 Quick Start
 
-- [Getting Started](getting-started.md)
-- [Configuration](configuration.md)
-- [Commands](commands.md)
-- [Model Configuration](model-configuration.md)
-- [S3 Integration](s3-integration.md)
-- [Best Practices](best-practices.md)
-- [Troubleshooting](troubleshooting.md)
+1. Install via Composer:
 
-## License
+```bash
+composer require thinkneverland/porter
+```
 
-Porter is a commercial package licensed by Think Neverland. Each license is specific to a single production environment. For full licensing details, visit [Think Neverland License Page](https://thinkneverland.com/license).
+2. Run the installation command:
+
+```bash
+php artisan porter:install
+```
+
+3. Configure your S3 credentials in `.env`:
+
+```env
+AWS_BUCKET=your-bucket-name
+AWS_DEFAULT_REGION=your-region
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+```
+
+4. Export your database:
+
+```bash
+php artisan porter:export backup.sql
+```
+
+## 📚 Documentation
+
+For detailed documentation, please visit our [GitBook documentation](https://thinkneverland.gitbook.io/porter/).
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](contributing.md) for details on our code of conduct and the process for submitting pull requests.
+
+## 📄 License
+
+Porter is open-source software licensed under the MIT license. See the [LICENSE](LICENSE.md) file for more details.

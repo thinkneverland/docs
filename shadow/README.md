@@ -1,59 +1,77 @@
-# 🏴‍☠️ Shadow API
+# 🌑 Shadow
 
-Shadow API is a powerful Laravel package that automatically generates RESTful APIs for your Eloquent models with consistent error handling and standardized responses. It's designed to significantly reduce the time and effort required to create and maintain APIs in your Laravel applications.
+Shadow is a powerful Laravel package that automatically generates RESTful APIs for your Eloquent models with consistent error handling and standardized responses.
 
-## 🚀 Key Features
+## 🎯 Key Features
 
 ### API Generation
 
-- **Automatic API Generation**: Instantly create RESTful APIs for your Eloquent models
+- **Automatic Endpoints**: Instant RESTful API creation for Eloquent models
 - **Standardized Responses**: Consistent response format across all endpoints
-- **Comprehensive Error Handling**: User-friendly error messages with detailed logging
-- **Built-in Documentation**: Interactive API documentation with Swagger/OpenAPI support
-
-### Model Integration
-
 - **Relationship Support**: Automatic handling of model relationships
-- **Foreign Key Resolution**: Smart resolution of foreign keys in CRUD operations
-- **Flexible Validation**: Model-specific validation with custom rules support
-- **Advanced Querying**: Support for filtering, sorting, and searching
+- **Foreign Key Resolution**: Smart handling of related data
 
-### Developer Experience
+### Data Management
 
-- **Built-in Pagination**: Automatic pagination for list endpoints
-- **Cache Management**: Intelligent caching system with multiple strategies
-- **Documentation Generation**: Automatic generation of API documentation
-- **Help System**: Comprehensive help system accessible via CLI and API
+- **Flexible Validation**: Model-specific validation rules
+- **Pagination**: Built-in support for paginated responses
+- **Query Parameters**: Filtering, sorting, and searching capabilities
+- **Data Transformation**: Automatic data formatting and transformation
 
-## 🛠️ System Requirements
+### Error Handling
+
+- **Comprehensive Errors**: Detailed error handling with friendly messages
+- **Server Logging**: Extensive error details logged server-side
+- **Security Focus**: Technical details hidden from API responses
+- **Standardized Format**: Consistent error response structure
+
+## 🔧 System Requirements
 
 - PHP 8.1 or higher
-- Laravel 9.0 or higher
-- Composer
-- Database (MySQL, PostgreSQL, or SQLite)
+- Laravel 10.0 or higher
+- MySQL 5.7+ / PostgreSQL 9.6+ / SQLite 3.8+
 
-## 📚 Documentation Structure
+## 🚀 Quick Start
 
-- **Getting Started**: Quick installation and basic usage guide
-- **Core Concepts**: Understanding Shadow's architecture and features
-- **API Reference**: Detailed endpoint documentation and usage examples
-- **Advanced Topics**: In-depth guides for advanced features
-- **Additional Resources**: Troubleshooting, contributing guidelines, and more
+1. Install via Composer:
 
-## 🔐 Security
+```bash
+composer require thinkneverland/shadow
+```
 
-Shadow API includes built-in security features:
+2. Register the service provider in `config/app.php`:
 
-- Authentication integration with Laravel's auth system
-- Authorization controls for API endpoints
-- Rate limiting support
-- Request validation and sanitization
-- Secure error handling and logging
+```php
+'providers' => [
+    Thinkneverland\Shadow\ShadowServiceProvider::class,
+],
+```
+
+3. Publish the configuration:
+
+```bash
+php artisan vendor:publish --provider="Thinkneverland\Shadow\ShadowServiceProvider" --tag="config"
+```
+
+4. Register routes in `RouteServiceProvider.php`:
+
+```php
+use Thinkneverland\Shadow\Facades\Shadow;
+
+public function boot(): void
+{
+    Shadow::routes();
+}
+```
+
+## 📚 Documentation
+
+For detailed documentation, please visit our [GitBook documentation](https://thinkneverland.gitbook.io/shadow/).
 
 ## 🤝 Contributing
 
-We welcome contributions! Please read our [Contributing Guide](../CONTRIBUTING.md) to learn how you can help improve Shadow API.
+We welcome contributions! Please read our [Contributing Guide](contributing.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## 📄 License
 
-Shadow API is open-source software licensed under the MIT license.
+Shadow is open-source software licensed under the MIT license. See the [LICENSE](LICENSE.md) file for more details.

@@ -1,10 +1,10 @@
 # Getting Started with Sole
 
-This guide will walk you through setting up and using Sole in your Laravel application.
+This guide will help you get started with Sole by walking you through installation and basic usage.
 
 ## Installation
 
-1. Install the package via Composer:
+1. Install Sole via Composer:
 
 ```bash
 composer require thinkneverland/sole
@@ -32,230 +32,184 @@ php artisan vendor:publish --tag=sole-assets
 <script src="{{ asset('vendor/sole/sole.min.js') }}"></script>
 ```
 
-## Creating Your First Component
+4. For TypeScript support, add types to your `tsconfig.json`:
 
-1. Use the artisan command to create a new component:
-
-```bash
-php artisan make:sole Counter
+```json
+{
+    "compilerOptions": {
+        "types": ["@thinkneverland/sole"]
+    }
+}
 ```
 
-This will create a new file at `resources/views/components/Counter.sole` with the following structure:
+## Basic Usage
 
-```html
+### Creating Your First Component
+
+Create a new file `resources/views/components/counter.sole`:
+
+```php
 <template>
     <div>
-        <h2>{{ $state->title }}</h2>
-        <p>Counter: {{ $state->count }}</p>
+        <h2>Count: {{ $state->count }}</h2>
         <button click="increment">Increment</button>
     </div>
 </template>
 
 <?php
-// Component state and methods
-$state->title ??= 'Counter';
-$state->count ??= 0;
-
 function mount() {
-    // Called when component is first mounted
+    $state->count = 0;
 }
 
 function increment() {
     $state->count++;
 }
-
-function updating($property, $value) {
-    // Called before state updates
-}
-
-function updated($property, $value) {
-    // Called after state updates
-}
 ?>
-
-<style scoped>
-div {
-    padding: 1rem;
-}
-</style>
 ```
 
-## Using Components
+### Using Components in Your Views
 
-1. Use the `@sole` directive in your Blade views:
-
-```html
-@sole('components.counter')
-```
-
-2. Pass props to your component:
-
-```html
-@sole('components.counter', ['title' => 'My Counter'])
-```
-
-## Component Structure
-
-### Template Section
-
-The template section contains your component's HTML using Blade syntax:
-
-```html
-<template>
-    <div>
-        <!-- Your component's HTML here -->
-    </div>
-</template>
-```
-
-### PHP Section
-
-The PHP section defines your component's logic:
+Include your Sole component in a Blade view:
 
 ```php
-<?php
-// Initial state
-$state->property ??= 'default value';
-
-// Lifecycle hooks
-function mount() {
-    // Component initialization
-}
-
-// Event handlers
-function handleClick() {
-    $state->property = 'new value';
-}
-?>
-```
-
-### Style Section
-
-The style section contains component-specific CSS:
-
-```html
-<style scoped>
-/* Styles are automatically scoped to your component */
-div {
-    /* Your styles here */
-}
-</style>
-```
-
-## Advanced Features
-
-### Progressive Web App Support
-
-Enable offline capabilities:
-
-```html
-<div offline-capable>
-    <!-- This content will work offline -->
-    <p>{{ $state->message }}</p>
-    <button click="saveData">Save (works offline)</button>
-</div>
+<x-counter />
 ```
 
 ### State Management
 
-#### Computed Properties
+Initialize and manage component state:
 
 ```php
+<template>
+    <div>
+        <input type="text" model="name">
+        <p>Hello, {{ $state->name }}!</p>
+    </div>
+</template>
+
+<?php
 function mount() {
-    $state->items = [
-        ['name' => 'Item 1', 'price' => 10],
-        ['name' => 'Item 2', 'price' => 20]
-    ];
-    
-    $this->defineComputed('total', function() {
-        return array_sum(array_column($state->items, 'price'));
-    }, ['items']);
+    $state->name = '';
 }
+?>
 ```
 
-#### Shared State
+### Event Handling
+
+Handle user interactions:
 
 ```php
+<template>
+    <div>
+        <button click="handleClick">Click me</button>
+        <p>{{ $state->message }}</p>
+    </div>
+</template>
+
+<?php
 function mount() {
-    $this->useSharedState('cart');
-    $state->items ??= [];
+    $state->message = '';
 }
+
+function handleClick() {
+    $state->message = 'Button clicked!';
+}
+?>
 ```
 
 ### File Uploads
 
-```html
-<input 
-    type="file" 
-    upload 
-    :max-file-size="5242880"
-    :allowed-types="['image/jpeg', 'image/png']"
->
-```
-
-### Internationalization
+Handle file uploads with progress tracking:
 
 ```php
-// Define translations
-$translations = [
-    'en' => [
-        'welcome.title' => 'Welcome',
-        'welcome.description' => 'Hello, :name!'
-    ],
-    'fr' => [
-        'welcome.title' => 'Bienvenue',
-        'welcome.description' => 'Bonjour, :name!'
-    ]
-];
+<template>
+    <div>
+        <input type="file" upload="handleUpload">
+        <div class="progress" show="$state->uploading">
+            {{ $state->progress }}%
+        </div>
+    </div>
+</template>
 
+<?php
 function mount() {
-    app('sole.translator')->registerComponentTranslations('welcome', $translations);
+    $state->uploading = false;
+    $state->progress = 0;
 }
+
+function handleUpload($file) {
+    $state->uploading = true;
+    
+    $this->upload($file, function($progress) {
+        $state->progress = $progress;
+    })->then(function($response) {
+        $state->uploading = false;
+        $state->progress = 100;
+    });
+}
+?>
 ```
 
-## Best Practices
+### Real-time Updates
 
-1. **Component Organization**
-   - Keep components focused and single-purpose
-   - Use meaningful names that describe functionality
-   - Group related components in subdirectories
+Enable auto-refresh capabilities:
 
-2. **State Management**
-   - Initialize all state properties in mount()
-   - Use computed properties for derived values
-   - Keep state mutations predictable
+```php
+<template>
+    <div>
+        <div refresh="30s">
+            <h3>Last updated: {{ $state->timestamp }}</h3>
+            <ul>
+                @foreach($state->items as $item)
+                    <li>{{ $item->name }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+</template>
 
-3. **Performance**
-   - Use lazy loading for large components
-   - Implement proper caching strategies
-   - Optimize asset loading
+<?php
+function mount() {
+    $this->refresh('30s');
+    $state->items = [];
+    $state->timestamp = now();
+}
 
-4. **Security**
-   - Validate all user input
-   - Use CSRF protection
-   - Implement proper authorization
-
-5. **Accessibility**
-   - Use semantic HTML
-   - Include ARIA attributes
-   - Test with screen readers
-
-## Debugging
-
-Enable debug mode in your `.env` file:
-
-```env
-SOLE_DEBUG=true
+function refresh() {
+    $state->items = Item::latest()->get();
+    $state->timestamp = now();
+}
+?>
 ```
 
-Or enable per component:
+### Computed Properties
 
-```html
-<sole name="components.counter" :debug="true"></sole>
+Use computed properties for derived state:
+
+```php
+<template>
+    <div>
+        <input type="number" model="price">
+        <input type="number" model="quantity">
+        <p>Total: ${{ $state->total }}</p>
+    </div>
+</template>
+
+<?php
+function mount() {
+    $state->price = 0;
+    $state->quantity = 0;
+    
+    $this->defineComputed('total', function() {
+        return $state->price * $state->quantity;
+    }, ['price', 'quantity']);
+}
+?>
 ```
 
 ## Next Steps
 
-- Explore the [API Reference](api-reference.md) for detailed documentation
-- Learn about advanced features like AI integration
-- Join the community and contribute to the project
+- Learn about [Component Configuration](configuration.md)
+- Explore [Advanced Features](advanced-features.md)
+- Check out [Best Practices](best-practices.md)
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/sole/) for more resources

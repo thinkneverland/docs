@@ -1,6 +1,6 @@
 # Getting Started with Porter
 
-This guide will help you get up and running with Porter in your Laravel application.
+This guide will help you get started with Porter, from installation to performing your first database export and S3 bucket cloning operation.
 
 ## Installation
 
@@ -16,87 +16,56 @@ composer require thinkneverland/porter
 php artisan porter:install
 ```
 
-This command will:
-
-- Publish the configuration file
-- Prompt for S3 credentials
-- Set up necessary environment variables
-
-## Basic Configuration
-
-### Environment Variables
-
-Add the following variables to your `.env` file:
-
-```env
-# Primary S3 Configuration
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_DEFAULT_REGION=your_region
-AWS_BUCKET=your_bucket
-AWS_URL=your_url
-AWS_ENDPOINT=your_endpoint (optional)
-
-# Source S3 Configuration (for cloning)
-AWS_SOURCE_BUCKET=source_bucket
-AWS_SOURCE_REGION=source_region
-AWS_SOURCE_ACCESS_KEY_ID=source_access_key
-AWS_SOURCE_SECRET_ACCESS_KEY=source_secret_key
-AWS_SOURCE_URL=source_url
-AWS_SOURCE_ENDPOINT=source_endpoint (optional)
-
-# Alternative Export Configuration (optional)
-EXPORT_ALT_AWS_ENABLED=false
-EXPORT_ALT_AWS_BUCKET=alt_bucket
-EXPORT_ALT_AWS_REGION=alt_region
-EXPORT_ALT_AWS_ACCESS_KEY_ID=alt_access_key
-EXPORT_ALT_AWS_SECRET_ACCESS_KEY=alt_secret_key
-EXPORT_ALT_AWS_URL=alt_url
-EXPORT_ALT_AWS_ENDPOINT=alt_endpoint
-EXPORT_ALT_AWS_USE_PATH_STYLE_ENDPOINT=false
-```
+During installation, you'll be prompted to provide S3 credentials for both primary and alternative (secondary) S3 buckets. These will be stored in your `.env` file if not already set.
 
 ## Basic Usage
 
-### Exporting Database
+### Database Export
 
 Export your database to an SQL file:
 
 ```bash
-php artisan porter:export export.sql
+php artisan porter:export backup.sql
 ```
 
-Options:
+Available options:
 
-- `--drop-if-exists`: Include DROP TABLE IF EXISTS statements
-- `--keep-if-exists`: Keep IF EXISTS statements
+- `--drop-if-exists`: Include `DROP TABLE IF EXISTS` statements
+- `--keep-if-exists`: Keep `IF EXISTS` for all tables
 - `--no-expiration`: Prevent automatic file deletion
 
-### Importing Database
+Example with options:
+
+```bash
+php artisan porter:export backup.sql --drop-if-exists --no-expiration
+```
+
+### Database Import
 
 Import a database from an SQL file:
 
 ```bash
-php artisan porter:import database.sql
+php artisan porter:import backup.sql
 ```
 
-The import command supports both local files and S3 paths:
+You can import from:
 
-```bash
-php artisan porter:import s3://bucket-name/path/to/database.sql
-```
+- Local file: `php artisan porter:import /path/to/backup.sql`
+- S3 bucket: `php artisan porter:import s3://bucket-name/path/to/backup.sql`
 
-### Cloning S3 Buckets
+### S3 Bucket Cloning
 
-Clone contents between configured S3 buckets:
+Clone content between S3 buckets:
 
 ```bash
 php artisan porter:clone-s3
 ```
 
+This will clone files from the source bucket to the target bucket as defined in your configuration.
+
 ## Model Configuration
 
-Add the `PorterConfigurable` trait to your models to control data handling during export:
+Configure how your models handle data during export/import operations:
 
 ```php
 use ThinkNeverland\Porter\Traits\PorterConfigurable;
@@ -105,21 +74,54 @@ class User extends Model
 {
     use PorterConfigurable;
 
-    // Fields to be randomized during export
+    // Fields to randomize during export/import
     protected $omittedFromPorter = ['email', 'name'];
     
     // Specific row IDs to keep unchanged
     protected $keepForPorter = [1, 2, 3];
     
-    // Set to true to exclude this model
+    // Exclude this model from operations
     protected $ignoreFromPorter = true;
 }
 ```
 
+Available configuration properties:
+
+- `$omittedFromPorter`: Fields to randomize
+- `$keepForPorter`: Row IDs to preserve
+- `$ignoreFromPorter`: Exclude model from operations
+
+## Configuration
+
+The package uses a configuration file at `config/porter.php`. You can customize settings for:
+
+- S3 bucket configurations
+- Export expiration times
+- File storage locations
+- Data handling preferences
+
+Example configuration:
+
+```php
+return [
+    's3' => [
+        'target_bucket' => env('AWS_BUCKET'),
+        'source_bucket' => env('AWS_SOURCE_BUCKET'),
+        // ... other S3 settings
+    ],
+    'export_alt' => [
+        'enabled' => env('EXPORT_ALT_AWS_ENABLED', false),
+        'bucket' => env('EXPORT_ALT_AWS_BUCKET'),
+        // ... alternative S3 settings
+    ],
+    'expiration' => env('EXPORT_AWS_EXPIRATION', 3600),
+];
+```
+
 ## Next Steps
 
-- Review the [Configuration](configuration.md) guide for detailed settings
-- Learn about available [Commands](commands.md)
-- Explore [Model Configuration](model-configuration.md) options
-- Check [S3 Integration](s3-integration.md) for advanced S3 features
-- Follow [Best Practices](best-practices.md) for optimal usage
+- Check out the [Configuration Guide](configuration.md) for detailed settings
+- Learn about [S3 Integration](s3-integration.md) for bucket operations
+- Explore [Model Configuration](model-configuration.md) for data handling
+- Review [Best Practices](best-practices.md) for optimal usage
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/porter/) for more resources

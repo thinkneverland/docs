@@ -26,8 +26,21 @@ public function checkFile(string $filePath, array $options = []): array
 
 - `$filePath`: The path to the file
 - `$options`: Additional options for the check (optional)
+  - `check_resolution`: bool (default: true)
+  - `check_colors`: bool (default: true)
+  - `check_fonts`: bool (default: true)
+  - `check_bleed`: bool (default: true)
+  - `check_dielines`: bool (default: true)
+  - `check_special_finishes`: bool (default: true)
+  - `check_barcodes`: bool (default: true)
+  - `check_compliance`: bool (default: true)
 
 **Returns:** Array containing the preflight check report
+
+**Throws:**
+
+- `FileNotFoundException`: When the file does not exist
+- `UnsupportedFileTypeException`: When the file type is not supported
 
 ---
 
@@ -42,9 +55,15 @@ public function checkS3File(string $s3Path, array $options = []): array
 **Parameters:**
 
 - `$s3Path`: The S3 path to the file
-- `$options`: Additional options for the check (optional)
+- `$options`: Additional options for the check (same as checkFile)
 
 **Returns:** Array containing the preflight check report
+
+**Throws:**
+
+- `FileNotFoundException`: When the file does not exist in S3
+- `UnsupportedFileTypeException`: When the file type is not supported
+- `Exception`: When S3 storage is not configured
 
 ---
 
@@ -59,9 +78,14 @@ public function checkFromUrl(string $url, array $options = []): array
 **Parameters:**
 
 - `$url`: The pre-signed URL to the file
-- `$options`: Additional options for the check (optional)
+- `$options`: Additional options for the check (same as checkFile)
 
 **Returns:** Array containing the preflight check report
+
+**Throws:**
+
+- `FileNotFoundException`: When the file cannot be downloaded
+- `UnsupportedFileTypeException`: When the file type is not supported
 
 ---
 
@@ -76,9 +100,12 @@ public function batchCheck(array $files, array $options = []): array
 **Parameters:**
 
 - `$files`: Array of file paths, S3 paths, or URLs
-- `$options`: Additional options for the check (optional)
+- `$options`: Additional options for the check (same as checkFile)
 
-**Returns:** Array containing multiple preflight check reports
+**Returns:** Array containing:
+
+- `reports`: Array of preflight check reports
+- `errors`: Array of errors for failed checks
 
 ---
 
@@ -110,10 +137,26 @@ public function applyCorrections(string $filePath, array $corrections, string $o
 **Parameters:**
 
 - `$filePath`: The path to the file
-- `$corrections`: The corrections to apply
+- `$corrections`: Array of corrections to apply:
+
+  ```php
+  [
+      'convert_rgb_to_cmyk' => bool,
+      'flatten_transparencies' => bool,
+      'remove_non_printable_layers' => bool,
+      'standardize_overprint' => bool,
+      'fix_dieline_colors' => bool,
+  ]
+  ```
+
 - `$outputPath`: The path to save the corrected file
 
 **Returns:** Array containing the correction report
+
+**Throws:**
+
+- `FileNotFoundException`: When the file does not exist
+- `UnsupportedFileTypeException`: When the file type is not supported
 
 ## File Analyzers
 
@@ -219,7 +262,10 @@ class PsAnalyzer extends BaseAnalyzer
 ```php
 'color' => [
     'modes' => array,
-    'ink_coverage' => array,
+    'ink_coverage' => [
+        'coated' => int,
+        'uncoated' => int,
+    ],
     'rgb_detected' => bool,
     'spot_colors' => array,
 ]
@@ -231,7 +277,10 @@ class PsAnalyzer extends BaseAnalyzer
 'fonts' => [
     'embedded' => array,
     'missing' => array,
-    'sizes' => array,
+    'sizes' => [
+        'min_positive' => int,
+        'min_reversed' => int,
+    ],
 ]
 ```
 
@@ -243,20 +292,31 @@ class PsAnalyzer extends BaseAnalyzer
         'color' => string,
         'stroke_width_mm' => float,
         'stroke_width_inches' => float,
-        'stroke_center_mm' => array,
-        'stroke_edges_mm' => array,
-        'dimensions' => array,
+        'stroke_center_mm' => [
+            'x' => float,
+            'y' => float,
+        ],
+        'stroke_edges_mm' => [
+            'outer_x' => float,
+            'outer_y' => float,
+        ],
+        'dimensions' => [
+            'width_mm' => float,
+            'height_mm' => float,
+            'width_inches' => float,
+            'height_inches' => float,
+        ],
     ],
 ]
 ```
 
-### Issues
+### Issues Information
 
 ```php
 'issues' => [
     [
         'message' => string,
-        'severity' => string,
+        'severity' => string, // 'error', 'warning', 'info'
         'category' => string,
     ],
 ]
@@ -326,16 +386,25 @@ class PsAnalyzer extends BaseAnalyzer
 ### Exceptions
 
 - `FileNotFoundException`: Thrown when a file cannot be found
-- `UnsupportedFileTypeException`: Thrown when file type is not supported
-- `ConfigurationException`: Thrown when configuration is invalid
-- `ProcessingException`: Thrown when file processing fails
+- `UnsupportedFileTypeException`: Thrown when the file type is not supported
+- `Exception`: Thrown for general errors
 
-### Error Levels
+### Error Categories
 
-- `'fail'`: Critical issues that prevent processing
-- `'error'`: Serious issues that need attention
-- `'warning'`: Minor issues that should be reviewed
-- `'info'`: Informational messages
+- `resolution`: Resolution-related issues
+- `color`: Color-related issues
+- `font`: Font-related issues
+- `bleed`: Bleed-related issues
+- `dieline`: Dieline-related issues
+- `compliance`: Standards compliance issues
+- `special_finishes`: Special finish-related issues
+- `barcode`: Barcode-related issues
+
+### Severity Levels
+
+- `error`: Critical issues that must be fixed
+- `warning`: Issues that should be reviewed
+- `info`: Informational messages
 
 ## Best Practices
 

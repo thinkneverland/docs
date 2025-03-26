@@ -1,210 +1,123 @@
-# Shadow API Reference
+# API Reference
 
-This document provides detailed information about Shadow's API, including endpoints, configuration options, and core services.
+This document provides detailed information about Shadow's API, including endpoints, parameters, and response formats.
 
-## Core Services
-
-### ShadowService
-
-The main service that manages API operations and model interactions.
-
-```php
-use ThinkNeverland\Shadow\Services\ShadowService;
-
-class UserController extends Controller
-{
-    protected $shadow;
-    
-    public function __construct(ShadowService $shadow)
-    {
-        $this->shadow = $shadow;
-    }
-}
-```
-
-### ModelRegistry
-
-Manages the registration and configuration of Shadow-enabled models.
-
-```php
-use ThinkNeverland\Shadow\Services\Registry\ModelRegistry;
-
-// Models are automatically discovered and registered
-$models = app(ModelRegistry::class)->getModels();
-```
-
-## API Endpoints
+## Endpoints
 
 ### Resource Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/shadow-api/model/{model}` | List resources |
-| GET | `/shadow-api/model/{model}/{id}` | Show a specific resource |
-| POST | `/shadow-api/model/{model}` | Create a resource |
-| PUT | `/shadow-api/model/{model}/{id}` | Update a resource |
-| DELETE | `/shadow-api/model/{model}/{id}` | Delete a resource |
-
-### Utility Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/shadow-api/models` | List all available models |
-| GET | `/shadow-api/help` | API documentation and help |
-| GET | `/shadow-api/help/{model}` | Help for a specific model |
-| GET | `/shadow-api/help/resources/{model}/schema` | View schema for a model |
-| GET | `/shadow-api/help/resources/{model}/actions` | View available actions |
-| GET | `/shadow-api/help/resources/{model}/validation` | View validation rules |
-| GET | `/shadow-api/help/resources/{model}/examples` | View examples |
-
-### Documentation Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/shadow-api/docs` | Swagger UI documentation |
-| GET | `/shadow-api/docs/swagger.json` | OpenAPI/Swagger JSON |
-| GET | `/shadow-api/docs/postman` | Postman collection |
-
-## Query Parameters
-
-### Filtering
+#### List Resources
 
 ```http
-GET /shadow-api/users?filter[status]=active
-GET /shadow-api/users?filter[role]=admin&filter[active]=true
-GET /shadow-api/users?filter[created_at][gt]=2024-01-01
+GET /shadow-api/model/{model}
 ```
 
-Supported operators:
+**Parameters:**
 
-- `eq` (equals, default)
-- `gt` (greater than)
-- `gte` (greater than or equal)
-- `lt` (less than)
-- `lte` (less than or equal)
-- `like` (SQL LIKE)
-- `in` (IN array)
-- `null` (IS NULL)
-- `not_null` (IS NOT NULL)
+- `search`: Search term for searchable fields
+- `sort`: Field to sort by
+- `order`: Sort order (asc/desc)
+- `page`: Page number
+- `per_page`: Items per page
+- `include`: Related resources to include
+- `fields`: Fields to return
+- `filter`: Filter conditions
 
-### Sorting
+**Example:**
 
 ```http
-GET /shadow-api/users?sort=name
-GET /shadow-api/users?sort=-created_at
-GET /shadow-api/users?sort=role,-created_at
+GET /shadow-api/model/users?search=john&sort=name&order=desc&page=1&per_page=15&include=posts
 ```
 
-### Pagination
+#### Show Resource
 
 ```http
-GET /shadow-api/users?page=2
-GET /shadow-api/users?per_page=50
+GET /shadow-api/model/{model}/{id}
 ```
 
-### Including Relations
+**Parameters:**
+
+- `include`: Related resources to include
+- `fields`: Fields to return
+
+**Example:**
 
 ```http
-GET /shadow-api/users?include=posts
-GET /shadow-api/users?include=posts.comments,profile
+GET /shadow-api/model/users/1?include=posts,comments
 ```
 
-### Field Selection
+#### Create Resource
 
 ```http
-GET /shadow-api/users?fields=id,name,email
-GET /shadow-api/users?fields=id,name&include=posts:id,title
+POST /shadow-api/model/{model}
 ```
 
-## Configuration
+**Parameters:**
 
-### Package Configuration
+- Request body: Resource data
 
-```php
-// config/shadow.php
-return [
-    // Base path for API routes
-    'route_prefix' => 'shadow-api',
+**Example:**
 
-    // List of models to expose in the API
-    'models' => [
-        'include' => [],
-        'exclude' => [],
-    ],
-    
-    // Middleware to apply to all API routes
-    'middleware' => ['api'],
-    
-    // Enable/disable API documentation
-    'enable_documentation' => true,
-    
-    // Configure model namespace paths
-    'model_namespaces' => [
-        'App\\Models',
-    ],
-    
-    // Cache settings
-    'cache' => [
-        'enabled' => true,
-        'ttl' => 3600,
-    ],
-    
-    // Response formatting
-    'response' => [
-        'include_request_info' => true,
-    ],
-];
-```
+```http
+POST /shadow-api/model/users
+Content-Type: application/json
 
-### Model Configuration
-
-```php
-use ThinkNeverland\Shadow\Traits\HasShadow;
-
-class User extends Model
 {
-    use HasShadow;
-
-    protected $shadowConfig = [
-        // Searchable fields
-        'searchable' => ['name', 'email'],
-        
-        // Filterable fields
-        'filterable' => ['status', 'role'],
-        
-        // Sortable fields
-        'sortable' => ['created_at', 'name'],
-        
-        // Included relationships
-        'includes' => ['profile', 'posts'],
-        
-        // Validation rules
-        'validation' => [
-            'create' => [
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users',
-            ],
-            'update' => [
-                'name' => 'sometimes|string|max:255',
-                'email' => 'sometimes|email|unique:users',
-            ]
-        ],
-        
-        // Documentation
-        'documentation' => [
-            'description' => 'User management',
-            'examples' => [
-                'create' => [
-                    'name' => 'John Doe',
-                    'email' => 'john@example.com',
-                ],
-            ],
-        ],
-    ];
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "secret123"
 }
 ```
 
-## Response Format
+#### Update Resource
+
+```http
+PUT /shadow-api/model/{model}/{id}
+```
+
+**Parameters:**
+
+- Request body: Resource data
+
+**Example:**
+
+```http
+PUT /shadow-api/model/users/1
+Content-Type: application/json
+
+{
+    "name": "John Doe Updated",
+    "email": "john.updated@example.com"
+}
+```
+
+#### Delete Resource
+
+```http
+DELETE /shadow-api/model/{model}/{id}
+```
+
+### Utility Endpoints
+
+#### List Available Models
+
+```http
+GET /shadow-api/models
+```
+
+#### Get API Documentation
+
+```http
+GET /shadow-api/help
+```
+
+#### Get Model Documentation
+
+```http
+GET /shadow-api/help/{model}
+```
+
+## Response Formats
 
 ### Success Response
 
@@ -212,17 +125,15 @@ class User extends Model
 {
     "success": true,
     "message": "Operation successful",
-    "data": { ... },
-    "request_info": {
-        "timestamp": "2024-01-01T12:34:56+00:00",
-        "ip": "192.168.1.1",
-        "method": "GET",
-        "url": "https://example.com/shadow-api/users/1",
-        "user_agent": "Mozilla/5.0...",
-        "user": {
-            "id": 1,
-            "name": "John Doe"
-        },
+    "data": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "created_at": "2024-01-01T12:00:00Z",
+        "updated_at": "2024-01-01T12:00:00Z"
+    },
+    "meta": {
+        "timestamp": "2024-01-01T12:00:00Z",
         "request_id": "550e8400-e29b-41d4-a716-446655440000"
     }
 }
@@ -233,12 +144,25 @@ class User extends Model
 ```json
 {
     "success": true,
-    "data": [ ... ],
+    "data": [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john@example.com"
+        },
+        {
+            "id": 2,
+            "name": "Jane Doe",
+            "email": "jane@example.com"
+        }
+    ],
     "meta": {
         "current_page": 1,
         "last_page": 5,
         "per_page": 15,
-        "total": 72
+        "total": 72,
+        "timestamp": "2024-01-01T12:00:00Z",
+        "request_id": "550e8400-e29b-41d4-a716-446655440000"
     }
 }
 ```
@@ -250,60 +174,82 @@ class User extends Model
     "success": false,
     "message": "The provided data is invalid.",
     "errors": {
-        "field_name": [
-            "Error message for field"
+        "email": [
+            "The email field is required."
+        ],
+        "password": [
+            "The password must be at least 8 characters."
         ]
+    },
+    "meta": {
+        "timestamp": "2024-01-01T12:00:00Z",
+        "request_id": "550e8400-e29b-41d4-a716-446655440000"
     }
 }
 ```
 
-## Error Handling
+## Query Parameters
 
-### HTTP Status Codes
+### Filtering
 
-| Status | Error Type | User Message |
-|--------|------------|--------------|
-| 400 | Invalid Request | "The request could not be processed." |
-| 401 | Unauthorized | "You must be logged in to perform this action." |
-| 403 | Forbidden | "You do not have permission to perform this action." |
-| 404 | Not Found | "The requested record could not be found." |
-| 409 | Conflict | "This record already exists. Please check for duplicates." |
-| 422 | Validation | "The provided data is invalid." |
-| 500 | Server Error | "An unexpected error occurred. Please try again later." |
-
-## Cache Management
-
-### Cache Commands
-
-```bash
-# Clear all Shadow cache
-php artisan shadow:cache:clear --all
-
-# Clear specific components
-php artisan shadow:cache:clear --models
-php artisan shadow:cache:clear --schema
-php artisan shadow:cache:clear --docs
-
-# Warm up cache
-php artisan shadow:cache:warmup --all
-php artisan shadow:cache:warmup --models
-
-# View cache metrics
-php artisan shadow:cache:metrics
-php artisan shadow:cache:metrics --tag=shadow-models --detailed
+```http
+GET /shadow-api/model/users?filter[status]=active&filter[role]=admin
 ```
 
-## Documentation Generation
+### Sorting
 
-### Command Line
-
-```bash
-# Generate Swagger documentation
-php artisan shadow:generate-docs --format=swagger
-
-# Generate Postman collection
-php artisan shadow:generate-docs --format=postman
-
-# Specify output location
-php artisan shadow:generate-docs --format=swagger --output=public/swagger/api-docs.json
+```http
+GET /shadow-api/model/users?sort=name&order=desc
 ```
+
+### Pagination
+
+```http
+GET /shadow-api/model/users?page=1&per_page=15
+```
+
+### Including Relations
+
+```http
+GET /shadow-api/model/users?include=posts,comments
+```
+
+### Field Selection
+
+```http
+GET /shadow-api/model/users?fields=id,name,email
+```
+
+## Error Codes
+
+| HTTP Status | Error Type | Description |
+|-------------|------------|-------------|
+| 400 | Bad Request | Invalid request parameters |
+| 401 | Unauthorized | Authentication required |
+| 403 | Forbidden | Insufficient permissions |
+| 404 | Not Found | Resource not found |
+| 422 | Validation Error | Invalid data provided |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Server Error | Internal server error |
+
+## Rate Limiting
+
+By default, Shadow implements rate limiting:
+
+- 60 requests per minute per IP
+- Customizable via configuration
+
+## Authentication
+
+Shadow supports various authentication methods:
+
+- API Tokens
+- OAuth2
+- Session-based authentication
+
+## Next Steps
+
+- Learn about [Advanced Features](advanced-features.md)
+- Review [Best Practices](best-practices.md)
+- Check out [Examples](examples.md)
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/shadow/) for more resources

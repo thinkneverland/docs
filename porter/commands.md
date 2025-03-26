@@ -1,48 +1,54 @@
 # Available Commands
 
-Porter provides several Artisan commands for managing database exports, imports, and S3 operations.
+This guide covers all available commands in Porter, their options, and usage examples.
 
 ## Installation Command
 
-### porter:install
+### `porter:install`
 
-Installs and configures the Porter package.
+Installs and configures Porter in your Laravel application.
 
 ```bash
 php artisan porter:install
 ```
 
-**What it does:**
+This command will:
 
-- Publishes the configuration file
-- Prompts for S3 credentials
-- Sets up environment variables
-- Configures storage settings
+- Publish the configuration file
+- Prompt for S3 credentials
+- Set up necessary environment variables
 
 ## Export Commands
 
-### porter:export
+### `porter:export`
 
-Exports the database to an SQL file.
+Exports your database to an SQL file.
 
 ```bash
-php artisan porter:export {filename} [--drop-if-exists] [--keep-if-exists] [--no-expiration]
+php artisan porter:export {file} [--drop-if-exists] [--keep-if-exists] [--no-expiration]
 ```
 
-**Arguments:**
+#### Arguments
 
-- `filename`: The name of the export file
+- `file`: The name of the SQL file to create
 
-**Options:**
+#### Options
 
-- `--drop-if-exists`: Includes DROP TABLE IF EXISTS statements
-- `--keep-if-exists`: Keeps IF EXISTS statements
-- `--no-expiration`: Prevents automatic file deletion
+- `--drop-if-exists`: Include `DROP TABLE IF EXISTS` statements
+- `--keep-if-exists`: Keep `IF EXISTS` for all tables
+- `--no-expiration`: Prevent automatic file deletion
 
-**Example:**
+#### Examples
 
 ```bash
+# Basic export
+php artisan porter:export backup.sql
+
+# Export with DROP TABLE statements
 php artisan porter:export backup.sql --drop-if-exists
+
+# Export without expiration
+php artisan porter:export backup.sql --no-expiration
 ```
 
 **Features:**
@@ -55,7 +61,7 @@ php artisan porter:export backup.sql --drop-if-exists
 
 ## Import Commands
 
-### porter:import
+### `porter:import`
 
 Imports a database from an SQL file.
 
@@ -63,9 +69,19 @@ Imports a database from an SQL file.
 php artisan porter:import {file}
 ```
 
-**Arguments:**
+#### Arguments
 
-- `file`: Path to the SQL file (local or S3)
+- `file`: Path to the SQL file to import
+
+#### Examples
+
+```bash
+# Import from local file
+php artisan porter:import backup.sql
+
+# Import from S3
+php artisan porter:import s3://bucket-name/path/to/backup.sql
+```
 
 **Features:**
 
@@ -75,25 +91,21 @@ php artisan porter:import {file}
 - Automatic error handling
 - Progress indicators
 
-**Examples:**
-
-```bash
-# Import from local file
-php artisan porter:import database.sql
-
-# Import from S3
-php artisan porter:import s3://bucket-name/database.sql
-```
-
 ## S3 Commands
 
-### porter:clone-s3
+### `porter:clone-s3`
 
-Clones contents between configured S3 buckets.
+Clones content between configured S3 buckets.
 
 ```bash
 php artisan porter:clone-s3
 ```
+
+This command will:
+
+- Copy files from source bucket to target bucket
+- Maintain file structure and metadata
+- Handle large files with multipart uploads
 
 **Features:**
 
@@ -112,50 +124,53 @@ php artisan porter:clone-s3
 5. Transfers files in batches
 6. Reports success/failure
 
-## Common Options
+## Testing Commands
 
-Most commands support these common features:
+### `porter:test`
 
-- Progress bars for long operations
-- Detailed error messages
-- Confirmation prompts for destructive operations
-- Verbose mode for debugging
+Runs the Porter test suite to verify functionality.
+
+```bash
+php artisan porter:test
+```
+
+This command will:
+
+- Test database export/import
+- Test S3 operations
+- Verify configurations
+
+## Command Output Examples
+
+### Database Export Output
+
+```bash
+$ php artisan porter:export backup.sql
+Database exported successfully to: backup.sql
+Download your SQL file here: http://localhost/download/backup.sql
+```
+
+### S3 Cloning Output
+
+```bash
+$ php artisan porter:clone-s3
+Starting S3 bucket cloning...
+Files copied: 150/150
+Cloning completed successfully!
+```
 
 ## Error Handling
 
-Commands handle various error scenarios:
+Commands provide clear error messages for common issues:
 
-- Connection failures
-- Permission issues
-- File access problems
-- Storage limitations
-- Timeout errors
+- Invalid file paths
+- Database connection errors
+- S3 credential issues
+- Permission problems
 
-Each error includes:
+## Next Steps
 
-- Error code
-- Detailed message
-- Suggested resolution
-- Debug information (in verbose mode)
-
-## Best Practices
-
-1. **Export Operations**
-   - Use `--drop-if-exists` when replacing entire tables
-   - Set appropriate expiration times
-   - Monitor file sizes and storage usage
-
-2. **Import Operations**
-   - Backup existing data before imports
-   - Test imports in development first
-   - Monitor memory usage for large imports
-
-3. **S3 Operations**
-   - Verify bucket permissions
-   - Use appropriate IAM policies
-   - Monitor transfer costs
-
-4. **General Usage**
-   - Run in maintenance mode for large operations
-   - Schedule operations during low-traffic periods
-   - Monitor and log all operations
+- Review [Configuration](configuration.md) for command settings
+- Learn about [S3 Integration](s3-integration.md) for S3 operations
+- Check [Troubleshooting](troubleshooting.md) for common issues
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/porter/) for more resources

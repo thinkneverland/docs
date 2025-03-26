@@ -1,285 +1,244 @@
-# Second Star API Reference
+# API Reference
 
-This document provides detailed information about Second Star's API, including classes, methods, and configuration options.
+This document provides detailed information about Second Star's API, including commands, generators, and configuration options.
 
-## Core Classes
+## Commands
 
-### SecondStar Facade
+### `test:generate`
 
-The `SecondStar` facade provides access to the main functionality:
+Generates tests for a specified file.
 
-```php
-use ThinkNeverland\SecondStar\Facades\SecondStar;
-
-// Generate tests
-SecondStar::generate($className, $options);
-
-// Generate coverage
-SecondStar::coverage($options);
-
-// Setup Cypress
-SecondStar::setupCypress($options);
+```bash
+php artisan test:generate --file=path/to/file.php [options]
 ```
 
-### TestGenerator
+#### Arguments
 
-The base test generator class that all specific generators extend:
+- `--file`: Path to the file to generate tests for (required)
 
-```php
-abstract class BaseTestGenerator implements TestGenerator
-{
-    public function generate(string $className): void;
-    public function setOptions(array $options): self;
-    public function getStub(): string;
-    protected function parseClass(string $className): ReflectionClass;
-    protected function getMethods(): array;
-    protected function getDependencies(): array;
-}
+#### Options
+
+- `--unit`: Generate a unit test (default: true)
+- `--feature`: Generate a feature test
+- `--phpunit`: Use PHPUnit (default: true)
+- `--pest`: Use Pest
+- `--output`: Directory to output the test to
+- `--namespace`: Namespace to use for the test
+
+#### Examples
+
+```bash
+# Generate a unit test
+php artisan test:generate --file=app/Repositories/UserRepository.php --unit --phpunit
+
+# Generate a feature test
+php artisan test:generate --file=app/Services/UserService.php --feature --phpunit
 ```
 
-## Available Generators
-
-### ServiceTestGenerator
-
-Generates tests for service classes:
-
-```php
-use ThinkNeverland\SecondStar\Generators\ServiceTestGenerator;
-
-$generator = new ServiceTestGenerator();
-$generator->setOptions([
-    'namespace' => 'Tests\\Unit\\Services',
-    'suffix' => 'Test',
-    'mock_dependencies' => true,
-]);
-$generator->generate('App\\Services\\UserService');
-```
+## Generators
 
 ### RepositoryTestGenerator
 
-Generates tests for repository classes:
+Generates tests for repository classes.
 
 ```php
 use ThinkNeverland\SecondStar\Generators\RepositoryTestGenerator;
 
-$generator = new RepositoryTestGenerator();
-$generator->setOptions([
-    'namespace' => 'Tests\\Unit\\Repositories',
-    'use_factories' => true,
-]);
-$generator->generate('App\\Repositories\\UserRepository');
+$generator = app(RepositoryTestGenerator::class);
+$test = $generator->generate(string $file, array $options = []);
 ```
 
-### ApiTestGenerator
+#### Parameters
 
-Generates API feature tests:
+- `$file`: Path to the repository file
+- `$options`: Array of generation options
+  - `unit`: Whether to generate a unit test (default: true)
+  - `feature`: Whether to generate a feature test
+  - `phpunit`: Whether to use PHPUnit (default: true)
+  - `pest`: Whether to use Pest
+  - `output`: Output directory
+  - `namespace`: Test namespace
+
+#### Returns
+
+- `string`: Generated test content
+
+### ServiceTestGenerator
+
+Generates tests for service classes.
 
 ```php
-use ThinkNeverland\SecondStar\Generators\ApiTestGenerator;
+use ThinkNeverland\SecondStar\Generators\ServiceTestGenerator;
 
-$generator = new ApiTestGenerator();
-$generator->setOptions([
-    'namespace' => 'Tests\\Feature\\Api',
-    'with_authentication' => true,
-]);
-$generator->generate('App\\Http\\Controllers\\Api\\UserController');
+$generator = app(ServiceTestGenerator::class);
+$test = $generator->generate(string $file, array $options = []);
 ```
 
-## Commands
+#### Parameters
 
-### TestGenerateCommand
+- `$file`: Path to the service file
+- `$options`: Array of generation options
+  - `unit`: Whether to generate a unit test (default: true)
+  - `feature`: Whether to generate a feature test
+  - `phpunit`: Whether to use PHPUnit (default: true)
+  - `pest`: Whether to use Pest
+  - `output`: Output directory
+  - `namespace`: Test namespace
 
-```bash
-php artisan test:generate [className] [options]
+#### Returns
 
-Options:
-  --type=TYPE           Type of test to generate (service|repository|api)
-  --namespace=NAMESPACE Custom namespace for generated test
-  --suffix=SUFFIX       Custom suffix for test class name
-  --force              Overwrite existing test file
-```
-
-### TestCoverageCommand
-
-```bash
-php artisan test:coverage [options]
-
-Options:
-  --format=FORMAT      Output format (html|clover|text)
-  --min=PERCENTAGE    Minimum required coverage percentage
-  --output=PATH       Custom output path for coverage report
-```
-
-### CypressSetupCommand
-
-```bash
-php artisan test:cypress-setup [options]
-
-Options:
-  --force             Overwrite existing Cypress setup
-  --with-examples     Include example tests
-```
+- `string`: Generated test content
 
 ## Configuration
 
-### Test Generation
+### `config/secondstar.php`
+
+The configuration file allows you to customize Second Star's behavior.
 
 ```php
-'generators' => [
-    'service' => [
-        'class' => ServiceTestGenerator::class,
-        'namespace' => 'Tests\\Unit\\Services',
-        'suffix' => 'Test',
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Default Test Framework
+    |--------------------------------------------------------------------------
+    |
+    | This option controls which test framework to use by default.
+    | Supported values: "phpunit", "pest"
+    |
+    */
+    'framework' => env('SECONDSTAR_FRAMEWORK', 'phpunit'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Test Type
+    |--------------------------------------------------------------------------
+    |
+    | This option controls which type of test to generate by default.
+    | Supported values: "unit", "feature"
+    |
+    */
+    'type' => env('SECONDSTAR_TYPE', 'unit'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Output Directory
+    |--------------------------------------------------------------------------
+    |
+    | This option controls where generated tests will be placed.
+    |
+    */
+    'output' => [
+        'path' => env('SECONDSTAR_OUTPUT_PATH', 'tests'),
+        'namespace' => env('SECONDSTAR_NAMESPACE', 'Tests'),
     ],
-    'repository' => [
-        'class' => RepositoryTestGenerator::class,
-        'namespace' => 'Tests\\Unit\\Repositories',
-        'suffix' => 'Test',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mock Generation
+    |--------------------------------------------------------------------------
+    |
+    | This option controls how mocks are generated for dependencies.
+    |
+    */
+    'mocks' => [
+        'auto_detect' => true,
+        'use_interface' => true,
+        'mock_abstract' => true,
     ],
-    'api' => [
-        'class' => ApiTestGenerator::class,
-        'namespace' => 'Tests\\Feature\\Api',
-        'suffix' => 'Test',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Test Templates
+    |--------------------------------------------------------------------------
+    |
+    | This option controls which templates to use for test generation.
+    |
+    */
+    'templates' => [
+        'path' => env('SECONDSTAR_TEMPLATES_PATH', 'resources/stubs/secondstar'),
     ],
-],
+];
 ```
 
-### Coverage Configuration
+## Traits
+
+### `PorterConfigurable`
+
+A trait that can be used to configure how a model's data is handled during export/import operations.
 
 ```php
-'coverage' => [
-    'driver' => 'pcov', // or 'xdebug'
-    'minimum' => 80,
-    'format' => 'html',
-    'output' => 'coverage',
-    'exclude' => [
-        'paths' => [
-            'app/Console/Kernel.php',
-            'app/Exceptions/Handler.php',
-        ],
-    ],
-],
+use ThinkNeverland\Porter\Traits\PorterConfigurable;
+
+class User extends Model
+{
+    use PorterConfigurable;
+
+    // Fields to randomize during export/import
+    protected $omittedFromPorter = ['email', 'name'];
+    
+    // Specific row IDs to keep unchanged
+    protected $keepForPorter = [1, 2, 3];
+    
+    // Exclude this model from operations
+    protected $ignoreFromPorter = true;
+}
 ```
 
-### Cypress Configuration
+#### Properties
 
-```php
-'cypress' => [
-    'baseUrl' => 'http://localhost:8000',
-    'video' => false,
-    'screenshots' => true,
-    'supportFile' => 'cypress/support/index.js',
-    'integrationFolder' => 'cypress/integration',
-],
-```
+- `$omittedFromPorter`: Array of field names to randomize
+- `$keepForPorter`: Array of row IDs to preserve
+- `$ignoreFromPorter`: Boolean to exclude the model
 
 ## Events
 
-Second Star dispatches events during test generation:
+### `TestGenerated`
+
+Fired when a test is successfully generated.
 
 ```php
-// Before test generation
-TestGenerationStarting::class
+use ThinkNeverland\SecondStar\Events\TestGenerated;
 
-// After test generation
-TestGenerationCompleted::class
-
-// When coverage report is generated
-CoverageReportGenerated::class
+Event::listen(TestGenerated::class, function ($event) {
+    // Handle test generation
+});
 ```
 
-## Extending
+#### Properties
 
-### Custom Test Generators
+- `$file`: Path to the generated test file
+- `$source`: Path to the source file
+- `$options`: Generation options used
 
-Create a custom generator by implementing the `TestGenerator` interface:
+## Exceptions
+
+### `GeneratorException`
+
+Thrown when there's an error during test generation.
 
 ```php
-use ThinkNeverland\SecondStar\Contracts\TestGenerator;
-
-class CustomTestGenerator implements TestGenerator
-{
-    public function generate(string $className): void
-    {
-        // Implementation
-    }
-    
-    public function setOptions(array $options): self
-    {
-        // Implementation
-    }
+try {
+    $generator->generate($file, $options);
+} catch (GeneratorException $e) {
+    // Handle generation error
 }
 ```
 
-Register your custom generator in the configuration:
+### `ConfigurationException`
+
+Thrown when there's an error in the configuration.
 
 ```php
-'generators' => [
-    'custom' => [
-        'class' => CustomTestGenerator::class,
-        'namespace' => 'Tests\\Custom',
-        'suffix' => 'Test',
-    ],
-],
-```
-
-### Custom Stubs
-
-Create custom stub files in `stubs/tests` directory:
-
-```php
-// stubs/tests/custom.stub
-namespace {{ namespace }};
-
-use Tests\TestCase;
-use {{ class }};
-
-class {{ class }}Test extends TestCase
-{
-    protected {{ class }} $instance;
-    
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->instance = new {{ class }}();
-    }
-    
-    /** @test */
-    public function it_works()
-    {
-        // Your test implementation
-    }
+try {
+    // Access configuration
+} catch (ConfigurationException $e) {
+    // Handle configuration error
 }
 ```
 
-## Error Handling
+## Next Steps
 
-Second Star throws the following exceptions:
-
-- `ClassNotFoundException`: When the target class cannot be found
-- `InvalidGeneratorException`: When an invalid generator type is specified
-- `StubNotFoundException`: When a stub file is missing
-- `ConfigurationException`: When configuration is invalid
-- `CoverageException`: When coverage generation fails
-
-## Best Practices
-
-1. **Generator Options**
-   - Always set appropriate namespaces
-   - Use meaningful test class names
-   - Configure mocking behavior explicitly
-
-2. **Coverage**
-   - Set realistic minimum coverage requirements
-   - Exclude irrelevant files
-   - Use appropriate drivers
-
-3. **Cypress**
-   - Configure base URL correctly
-   - Set up proper viewport settings
-   - Handle authentication properly
-
-4. **Custom Generators**
-   - Follow naming conventions
-   - Implement proper error handling
-   - Document custom options
+- Learn about [Advanced Features](advanced-features.md)
+- Review [Best Practices](best-practices.md)
+- Check out [Examples](examples.md)
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/second-star/) for more resources

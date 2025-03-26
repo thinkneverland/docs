@@ -1,110 +1,120 @@
 # Configuration Guide
 
-This guide covers all configuration options available in the Porter package.
+This guide covers all configuration options available in Porter, from basic settings to advanced S3 configurations.
+
+## Basic Configuration
+
+The Porter package uses a configuration file located at `config/porter.php` after running the install command.
+
+### Environment Variables
+
+Add the following variables to your `.env` file:
+
+```env
+# Primary S3 Configuration
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_DEFAULT_REGION=your_region
+AWS_BUCKET=your_bucket
+AWS_URL=your_url
+AWS_ENDPOINT=your_endpoint (optional)
+
+# Source S3 Configuration (for cloning)
+AWS_SOURCE_BUCKET=source_bucket
+AWS_SOURCE_REGION=source_region
+AWS_SOURCE_ACCESS_KEY_ID=source_access_key
+AWS_SOURCE_SECRET_ACCESS_KEY=source_secret_key
+AWS_SOURCE_URL=source_url
+AWS_SOURCE_ENDPOINT=source_endpoint (optional)
+
+# Alternative Export Configuration (optional)
+EXPORT_ALT_AWS_ENABLED=false
+EXPORT_ALT_AWS_BUCKET=alt_bucket
+EXPORT_ALT_AWS_REGION=alt_region
+EXPORT_ALT_AWS_ACCESS_KEY_ID=alt_access_key
+EXPORT_ALT_AWS_SECRET_ACCESS_KEY=alt_secret_key
+EXPORT_ALT_AWS_URL=alt_url
+EXPORT_ALT_AWS_ENDPOINT=alt_endpoint
+EXPORT_ALT_AWS_USE_PATH_STYLE_ENDPOINT=false
+
+# Export Settings
+EXPORT_AWS_EXPIRATION=3600  # Expiration time in seconds
+```
 
 ## Configuration File
 
-The configuration file is located at `config/porter.php` and contains settings for S3 bucket access and export options.
-
-### Basic Structure
+The main configuration file (`config/porter.php`) contains all settings for Porter:
 
 ```php
 return [
     's3' => [
-        // Target bucket configuration
+        // Target bucket (used only for cloning operations)
         'target_bucket'     => env('AWS_BUCKET'),
         'target_region'     => env('AWS_DEFAULT_REGION'),
         'target_access_key' => env('AWS_ACCESS_KEY_ID'),
         'target_secret_key' => env('AWS_SECRET_ACCESS_KEY'),
         'target_url'        => env('AWS_URL'),
-        'target_endpoint'   => env('AWS_ENDPOINT'),
+        'target_endpoint'   => env('AWS_ENDPOINT', null),  // Endpoint for target (optional)
 
-        // Source bucket configuration
+        // Source bucket (used only for cloning operations)
         'source_bucket'     => env('AWS_SOURCE_BUCKET'),
         'source_region'     => env('AWS_SOURCE_REGION'),
         'source_access_key' => env('AWS_SOURCE_ACCESS_KEY_ID'),
         'source_secret_key' => env('AWS_SOURCE_SECRET_ACCESS_KEY'),
         'source_url'        => env('AWS_SOURCE_URL'),
-        'source_endpoint'   => env('AWS_SOURCE_ENDPOINT'),
+        'source_endpoint'   => env('AWS_SOURCE_ENDPOINT', null),  // Endpoint for source (optional)
     ],
 
+    // Alternate S3 Export Configuration
     'export_alt' => [
         'enabled'                 => env('EXPORT_ALT_AWS_ENABLED', false),
-        'bucket'                  => env('EXPORT_ALT_AWS_BUCKET'),
-        'region'                  => env('EXPORT_ALT_AWS_REGION'),
-        'access_key'              => env('EXPORT_ALT_AWS_ACCESS_KEY_ID'),
-        'secret_key'              => env('EXPORT_ALT_AWS_SECRET_ACCESS_KEY'),
-        'url'                     => env('EXPORT_ALT_AWS_URL'),
-        'endpoint'                => env('EXPORT_ALT_AWS_ENDPOINT'),
+        'bucket'                  => env('EXPORT_ALT_AWS_BUCKET', null),
+        'region'                  => env('EXPORT_ALT_AWS_REGION', null),
+        'access_key'              => env('EXPORT_ALT_AWS_ACCESS_KEY_ID', null),
+        'secret_key'              => env('EXPORT_ALT_AWS_SECRET_ACCESS_KEY', null),
+        'url'                     => env('EXPORT_ALT_AWS_URL', null),
+        'endpoint'                => env('EXPORT_ALT_AWS_ENDPOINT', null), // Optional for custom S3 services like MinIO
         'use_path_style_endpoint' => env('EXPORT_ALT_AWS_USE_PATH_STYLE_ENDPOINT', false),
     ],
 
-    'expiration' => env('EXPORT_AWS_EXPIRATION', 3600),
+    'expiration' => env('EXPORT_AWS_EXPIRATION', 3600),  // Expiration time in seconds
 ];
 ```
 
-## S3 Configuration
+## S3 Configuration Details
 
 ### Primary S3 Configuration
 
-The primary S3 configuration is used for standard export operations and as the target for cloning operations:
-
-```php
-'s3' => [
-    'target_bucket'     => env('AWS_BUCKET'),
-    'target_region'     => env('AWS_DEFAULT_REGION'),
-    'target_access_key' => env('AWS_ACCESS_KEY_ID'),
-    'target_secret_key' => env('AWS_SECRET_ACCESS_KEY'),
-    'target_url'        => env('AWS_URL'),
-    'target_endpoint'   => env('AWS_ENDPOINT'),
-]
-```
+- `target_bucket`: The main S3 bucket for operations
+- `target_region`: AWS region for the target bucket
+- `target_access_key`: AWS access key for target bucket
+- `target_secret_key`: AWS secret key for target bucket
+- `target_url`: Custom URL for S3-compatible services
+- `target_endpoint`: Custom endpoint for S3-compatible services
 
 ### Source S3 Configuration
 
-The source S3 configuration is used as the source bucket for cloning operations:
-
-```php
-'s3' => [
-    'source_bucket'     => env('AWS_SOURCE_BUCKET'),
-    'source_region'     => env('AWS_SOURCE_REGION'),
-    'source_access_key' => env('AWS_SOURCE_ACCESS_KEY_ID'),
-    'source_secret_key' => env('AWS_SOURCE_SECRET_ACCESS_KEY'),
-    'source_url'        => env('AWS_SOURCE_URL'),
-    'source_endpoint'   => env('AWS_SOURCE_ENDPOINT'),
-]
-```
+- `source_bucket`: Source bucket for cloning operations
+- `source_region`: AWS region for the source bucket
+- `source_access_key`: AWS access key for source bucket
+- `source_secret_key`: AWS secret key for source bucket
+- `source_url`: Custom URL for source S3-compatible service
+- `source_endpoint`: Custom endpoint for source S3-compatible service
 
 ### Alternative Export Configuration
 
-The alternative export configuration allows exporting to a different S3 bucket:
-
-```php
-'export_alt' => [
-    'enabled'                 => env('EXPORT_ALT_AWS_ENABLED', false),
-    'bucket'                  => env('EXPORT_ALT_AWS_BUCKET'),
-    'region'                  => env('EXPORT_ALT_AWS_REGION'),
-    'access_key'              => env('EXPORT_ALT_AWS_ACCESS_KEY_ID'),
-    'secret_key'              => env('EXPORT_ALT_AWS_SECRET_ACCESS_KEY'),
-    'url'                     => env('EXPORT_ALT_AWS_URL'),
-    'endpoint'                => env('EXPORT_ALT_AWS_ENDPOINT'),
-    'use_path_style_endpoint' => env('EXPORT_ALT_AWS_USE_PATH_STYLE_ENDPOINT', false),
-]
-```
-
-## Export Settings
-
-### File Expiration
-
-Control how long exported files are retained:
-
-```php
-'expiration' => env('EXPORT_AWS_EXPIRATION', 3600), // Time in seconds
-```
+- `enabled`: Enable alternative S3 export
+- `bucket`: Alternative bucket for exports
+- `region`: AWS region for alternative bucket
+- `access_key`: AWS access key for alternative bucket
+- `secret_key`: AWS secret key for alternative bucket
+- `url`: Custom URL for alternative S3-compatible service
+- `endpoint`: Custom endpoint for alternative S3-compatible service
+- `use_path_style_endpoint`: Use path-style endpoints for custom S3 services
 
 ## IAM Policy Requirements
 
-For S3 operations to work correctly, your IAM policies need the following permissions:
+For S3 operations, ensure your IAM policies include the following permissions:
 
 ```json
 {
@@ -128,24 +138,33 @@ For S3 operations to work correctly, your IAM policies need the following permis
 }
 ```
 
-## Best Practices
+Replace `your-primary-bucket-name` and `your-alternative-bucket-name` with your actual bucket names.
 
-1. **Environment Variables**
-   - Always use environment variables for sensitive information
-   - Keep different configurations for development and production
-   - Use meaningful names for buckets and endpoints
+## Model Configuration
 
-2. **Security**
-   - Use IAM roles with minimal required permissions
-   - Regularly rotate access keys
-   - Enable bucket encryption when possible
+Models can be configured using the `PorterConfigurable` trait:
 
-3. **Performance**
-   - Set appropriate expiration times based on your needs
-   - Configure endpoints for optimal geographic access
-   - Use path style endpoints only when necessary
+```php
+use ThinkNeverland\Porter\Traits\PorterConfigurable;
 
-4. **Monitoring**
-   - Keep track of export file sizes
-   - Monitor S3 usage and costs
-   - Set up alerts for failed operations
+class User extends Model
+{
+    use PorterConfigurable;
+
+    // Fields to randomize during export/import
+    protected $omittedFromPorter = ['email', 'name'];
+    
+    // Specific row IDs to keep unchanged
+    protected $keepForPorter = [1, 2, 3];
+    
+    // Exclude this model from operations
+    protected $ignoreFromPorter = true;
+}
+```
+
+## Next Steps
+
+- Learn about [S3 Integration](s3-integration.md) for advanced S3 features
+- Explore [Model Configuration](model-configuration.md) for data handling
+- Review [Best Practices](best-practices.md) for optimal usage
+- Check [Troubleshooting](troubleshooting.md) for common issues

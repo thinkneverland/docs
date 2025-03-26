@@ -1,0 +1,65 @@
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+
+redirects:
+  # Package-specific redirects
+  flight-check/configuration: flight-check/configuration.md
+  flight-check/api-reference: flight-check/api-reference.md
+  flight-check/getting-started: flight-check/getting-started.md
+  
+  jolly-packager/api-reference: jolly-packager/api-reference.md
+  jolly-packager/getting-started: jolly-packager/getting-started.md
+  
+  porter/commands: porter/commands.md
+  porter/model-configuration: porter/model-configuration.md
+  porter/s3-integration: porter/s3-integration.md
+  porter/troubleshooting: porter/troubleshooting.md
+  porter/best-practices: porter/best-practices.md
+  porter/configuration: porter/configuration.md
+  porter/getting-started: porter/getting-started.md
+  
+  second-star/advanced-features: second-star/advanced-features.md
+  second-star/api-reference: second-star/api-reference.md
+  second-star/best-practices: second-star/best-practices.md
+  second-star/getting-started: second-star/getting-started.md
+  
+  shadow/caching: shadow/caching.md
+  shadow/config: shadow/config.md
+  shadow/core: shadow/core.md
+  shadow/advanced-features: shadow/advanced-features.md
+  shadow/api-reference: shadow/api-reference.md
+  shadow/best-practices: shadow/best-practices.md
+  shadow/configuration: shadow/configuration.md
+  shadow/getting-started: shadow/getting-started.md
+  
+  sole/advanced-features: sole/advanced-features.md
+  sole/api-reference: sole/api-reference.md
+  sole/best-practices: sole/best-practices.md
+  sole/getting-started: sole/getting-started.md
+  
+  tapped/api-reference: tapped/api-reference.md
+  tapped/getting-started: tapped/getting-started.md
+
+# Package-specific structures
+packages:
+  flight-check:
+    readme: flight-check/README.md
+    summary: flight-check/SUMMARY.md
+  jolly-packager:
+    readme: jolly-packager/README.md
+  porter:
+    readme: porter/README.md
+    summary: porter/SUMMARY.md
+  second-star:
+    readme: second-star/README.md
+    summary: second-star/SUMMARY.md
+  shadow:
+    readme: shadow/README.md
+    summary: shadow/SUMMARY.md
+  sole:
+    readme: sole/README.md
+  tapped:
+    readme: tapped/README.md 

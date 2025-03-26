@@ -1,60 +1,311 @@
 # Advanced Features
 
-This guide covers advanced features and techniques for getting the most out of Second Star.
+This guide covers advanced features and capabilities of Second Star.
+
+## Custom Test Generators
+
+Create your own test generators by extending the base generator class:
+
+```php
+use ThinkNeverland\SecondStar\Generators\BaseTestGenerator;
+
+class CustomTestGenerator extends BaseTestGenerator
+{
+    protected function getStub(): string
+    {
+        return 'custom.stub';
+    }
+
+    protected function getMethods(): array
+    {
+        $methods = parent::getMethods();
+        // Add custom method handling
+        return $methods;
+    }
+
+    protected function getDependencies(): array
+    {
+        $dependencies = parent::getDependencies();
+        // Add custom dependency handling
+        return $dependencies;
+    }
+}
+```
 
 ## Custom Test Templates
 
-### Creating Custom Stubs
-
-1. Create a new stub file in `stubs/tests`:
+Create custom test templates to match your project's style:
 
 ```php
-// stubs/tests/custom-service.stub
+// resources/stubs/secondstar/custom.stub
 namespace {{ namespace }};
 
 use Tests\TestCase;
 use {{ class }};
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class {{ class }}Test extends TestCase
 {
-    use RefreshDatabase;
-    
-    protected {{ class }} $service;
-    protected $dependencies = [];
+    protected {{ class }} $instance;
     
     protected function setUp(): void
     {
         parent::setUp();
-        $this->setupDependencies();
-        $this->service = new {{ class }}(...$this->dependencies);
+        $this->instance = new {{ class }}();
     }
     
-    protected function setupDependencies(): void
+    /** @test */
+    public function it_works()
     {
-        {{ dependencies }}
+        // Your test implementation
     }
-    
-    {{ methods }}
 }
 ```
 
-2. Register the custom stub in your configuration:
+## Advanced Mocking
+
+### Custom Mock Classes
+
+Define custom mock classes for specific dependencies:
 
 ```php
-'stubs' => [
-    'custom-service' => base_path('stubs/tests/custom-service.stub'),
-],
+use ThinkNeverland\SecondStar\Mocks\CustomMock;
+
+class UserRepositoryTest extends TestCase
+{
+    protected function getMockClass(string $class): string
+    {
+        if ($class === UserRepository::class) {
+            return CustomUserRepositoryMock::class;
+        }
+        return parent::getMockClass($class);
+    }
+}
 ```
 
-3. Use the custom stub in your generator:
+### Mock Behavior Configuration
+
+Configure mock behavior in your tests:
 
 ```php
-$generator->setOptions([
-    'stub' => 'custom-service',
-    'namespace' => 'Tests\\Unit\\Services',
-]);
+use Mockery;
+
+class UserServiceTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->mock(UserRepository::class, function ($mock) {
+            $mock->shouldReceive('find')
+                ->with(1)
+                ->andReturn(new User(['id' => 1]));
+        });
+    }
+}
 ```
+
+## Test Data Generation
+
+### Custom Data Providers
+
+Create custom data providers for your tests:
+
+```php
+use ThinkNeverland\SecondStar\DataProviders\CustomDataProvider;
+
+class UserServiceTest extends TestCase
+{
+    use CustomDataProvider;
+
+    /**
+     * @dataProvider userDataProvider
+     */
+    public function test_create_user($data)
+    {
+        // Test implementation
+    }
+
+    public function userDataProvider()
+    {
+        return [
+            'valid user' => [
+                [
+                    'name' => 'John Doe',
+                    'email' => 'john@example.com',
+                ]
+            ],
+            'invalid user' => [
+                [
+                    'name' => '',
+                    'email' => 'invalid-email',
+                ]
+            ],
+        ];
+    }
+}
+```
+
+### Factory Integration
+
+Use Laravel's model factories in your tests:
+
+```php
+use ThinkNeverland\SecondStar\Factories\CustomFactory;
+
+class UserServiceTest extends TestCase
+{
+    use CustomFactory;
+
+    public function test_create_user()
+    {
+        $userData = $this->factory(User::class)->make()->toArray();
+        
+        $user = $this->service->create($userData);
+        
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals($userData['name'], $user->name);
+    }
+}
+```
+
+## Test Organization
+
+### Test Groups
+
+Organize your tests into logical groups:
+
+```php
+use ThinkNeverland\SecondStar\Groups\TestGroup;
+
+class UserServiceTest extends TestCase
+{
+    use TestGroup;
+
+    protected function getGroups(): array
+    {
+        return [
+            'user-management',
+            'authentication',
+        ];
+    }
+}
+```
+
+### Test Categories
+
+Categorize your tests for better organization:
+
+```php
+use ThinkNeverland\SecondStar\Categories\TestCategory;
+
+class UserServiceTest extends TestCase
+{
+    use TestCategory;
+
+    protected function getCategory(): string
+    {
+        return 'user-service';
+    }
+}
+```
+
+## Advanced Assertions
+
+### Custom Assertions
+
+Create custom assertions for your tests:
+
+```php
+use ThinkNeverland\SecondStar\Assertions\CustomAssertion;
+
+class UserServiceTest extends TestCase
+{
+    use CustomAssertion;
+
+    public function test_user_has_valid_role()
+    {
+        $user = $this->service->create([
+            'name' => 'John Doe',
+            'role' => 'admin',
+        ]);
+
+        $this->assertUserHasRole($user, 'admin');
+    }
+}
+```
+
+### Complex Assertions
+
+Use complex assertions for testing relationships:
+
+```php
+use ThinkNeverland\SecondStar\Assertions\ComplexAssertion;
+
+class UserServiceTest extends TestCase
+{
+    use ComplexAssertion;
+
+    public function test_user_has_valid_permissions()
+    {
+        $user = $this->service->create([
+            'name' => 'John Doe',
+            'role' => 'admin',
+        ]);
+
+        $this->assertUserHasPermissions($user, [
+            'create-user',
+            'edit-user',
+            'delete-user',
+        ]);
+    }
+}
+```
+
+## Performance Optimization
+
+### Test Caching
+
+Enable test caching for faster execution:
+
+```php
+use ThinkNeverland\SecondStar\Cache\TestCache;
+
+class UserServiceTest extends TestCase
+{
+    use TestCache;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->enableCache();
+    }
+}
+```
+
+### Parallel Testing
+
+Run tests in parallel for better performance:
+
+```php
+use ThinkNeverland\SecondStar\Parallel\ParallelTest;
+
+class UserServiceTest extends TestCase
+{
+    use ParallelTest;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->enableParallel();
+    }
+}
+```
+
+## Next Steps
+
+- Review [Best Practices](best-practices.md)
+- Check out [Examples](examples.md)
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/second-star/) for more resources
 
 ## Advanced Test Generation
 

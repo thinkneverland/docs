@@ -216,6 +216,18 @@ This guide provides detailed information about configuring Flight Check for your
   ],
   ```
 
+- Enable rich black checking:
+
+  ```php
+  'check_rich_black' => true,
+  ```
+
+- Configure overprint settings:
+
+  ```php
+  'check_overprint' => true,
+  ```
+
 ### 3. Font Requirements
 
 - Enable font embedding:
@@ -252,6 +264,127 @@ This guide provides detailed information about configuring Flight Check for your
       // Or 'warning' for less strict
   ],
   ```
+
+### 6. Storage Configuration
+
+- For S3 integration:
+
+  ```php
+  'storage' => [
+      'disk' => 's3',
+      's3' => [
+          'enabled' => true,
+          'bucket' => 'your-bucket',
+          'region' => 'your-region',
+          'key' => 'your-key',
+          'secret' => 'your-secret',
+      ],
+  ],
+  ```
+
+### 7. Processing Settings
+
+- Configure batch processing:
+
+  ```php
+  'processing' => [
+      'batch_size' => 10,
+      'timeout' => 300,
+      'temp_directory' => 'app/temp/flightcheck',
+  ],
+  ```
+
+## Environment Variables
+
+For sensitive configuration values, you can use environment variables:
+
+```env
+FLIGHTCHECK_S3_BUCKET=your-bucket
+FLIGHTCHECK_S3_REGION=your-region
+FLIGHTCHECK_S3_KEY=your-key
+FLIGHTCHECK_S3_SECRET=your-secret
+```
+
+## Configuration Validation
+
+The package validates your configuration on startup. Common validation errors include:
+
+- Invalid DPI values
+- Missing required settings
+- Invalid color mode settings
+- Incorrect S3 credentials
+
+## Configuration Caching
+
+Flight Check caches the configuration for better performance. To clear the cache:
+
+```bash
+php artisan config:clear
+```
+
+## Custom Configuration
+
+You can extend the default configuration by creating a custom configuration file:
+
+```php
+// config/flightcheck.php
+return array_merge(
+    require __DIR__ . '/flightcheck.php',
+    [
+        // Your custom settings
+    ]
+);
+```
+
+## Configuration Examples
+
+### Digital Print Configuration
+
+```php
+return [
+    'dpi' => [
+        'min' => 300,
+        'line_art' => 1200,
+    ],
+    'color' => [
+        'allowed_modes' => ['CMYK'],
+        'max_ink_coverage' => [
+            'coated' => 300,
+            'uncoated' => 240,
+        ],
+    ],
+    'bleed' => [
+        'min_bleed_mm' => 3,
+        'safe_margin_mm' => 6,
+    ],
+];
+```
+
+### Packaging Configuration
+
+```php
+return [
+    'dpi' => [
+        'min' => 300,
+        'line_art' => 1200,
+    ],
+    'color' => [
+        'allowed_modes' => ['CMYK', 'Spot'],
+        'max_ink_coverage' => [
+            'coated' => 300,
+            'uncoated' => 240,
+        ],
+    ],
+    'dieline' => [
+        'detect_colors' => ['Dieline', 'CutContour'],
+        'max_stroke_width_mm' => 0.25,
+    ],
+    'special_finishes' => [
+        'check_spot_varnish' => true,
+        'check_embossing' => true,
+    ],
+];
+```
 
 ## Environment-Specific Configuration
 

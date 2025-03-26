@@ -7,7 +7,9 @@
         "search",
         "expandable-chapters",
         "back-to-top-button",
-        "copy-code-button"
+        "copy-code-button",
+        "heading-anchors",
+        "custom-favicon"
     ],
     "pluginsConfig": {
         "theme-api": {
@@ -16,11 +18,19 @@
         "search": {
             "maxIndexSize": 100000,
             "fuzzy": true
+        },
+        "custom-favicon": {
+            "favicon": "assets/favicon.ico"
         }
     },
     "gitbook": "3.2.3",
     "structure": {
         "readme": "README.md",
         "summary": "SUMMARY.md"
+    },
+    "links": {
+        "sidebar": {
+            "Think Neverland": "https://thinkneverland.com"
+        }
     }
 }

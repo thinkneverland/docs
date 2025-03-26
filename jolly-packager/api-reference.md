@@ -1,6 +1,155 @@
-# JollyPackager API Reference
+# API Reference
 
-This document provides detailed information about JollyPackager's API, including commands, services, and configuration options.
+This document provides detailed information about all available commands and their options in Jolly Packager.
+
+## Commands
+
+### `jolly:make`
+
+Creates a new Laravel package with the specified vendor and package name.
+
+```bash
+php artisan jolly:make vendor package
+```
+
+#### Arguments
+
+- `vendor`: The vendor name (e.g., acme)
+- `package`: The package name (e.g., my-package)
+
+#### Options
+
+- `--force`: Overwrite existing files if they exist
+- `--no-git`: Skip git repository initialization
+- `--no-composer`: Skip composer.json generation
+
+#### Examples
+
+```bash
+# Create a new package
+php artisan jolly:make acme my-package
+
+# Force creation, overwriting existing files
+php artisan jolly:make acme my-package --force
+
+# Create without git initialization
+php artisan jolly:make acme my-package --no-git
+```
+
+### `jolly:docs`
+
+Generates comprehensive documentation for your Laravel project.
+
+```bash
+php artisan jolly:docs directory --output=docs
+```
+
+#### Arguments
+
+- `directory`: The directory to scan for documentation (default: app)
+
+#### Options
+
+- `--output`: Specify the output directory for documentation (default: docs)
+- `--exclude`: Specify patterns to exclude from documentation
+- `--format`: Choose the documentation format (markdown, html)
+
+#### Examples
+
+```bash
+# Generate documentation for the app directory
+php artisan jolly:docs app
+
+# Generate documentation with custom output directory
+php artisan jolly:docs app --output=custom-docs
+
+# Generate documentation excluding specific patterns
+php artisan jolly:docs app --exclude="vendor/*,storage/*"
+
+# Generate HTML documentation
+php artisan jolly:docs app --format=html
+```
+
+## Configuration
+
+Jolly Packager can be configured through the `config/jollypackager.php` file:
+
+```php
+return [
+    'package' => [
+        'namespace' => env('JOLLYPACKAGER_NAMESPACE', 'App'),
+        'author' => env('JOLLYPACKAGER_AUTHOR', 'Your Name'),
+        'email' => env('JOLLYPACKAGER_EMAIL', 'your.email@example.com'),
+    ],
+    'docs' => [
+        'output_dir' => env('JOLLYPACKAGER_DOCS_DIR', 'docs'),
+        'exclude_patterns' => [
+            'vendor/*',
+            'storage/*',
+            'bootstrap/*',
+        ],
+    ],
+];
+```
+
+### Environment Variables
+
+- `JOLLYPACKAGER_NAMESPACE`: The namespace for generated packages
+- `JOLLYPACKAGER_AUTHOR`: The author name for package metadata
+- `JOLLYPACKAGER_EMAIL`: The author email for package metadata
+- `JOLLYPACKAGER_DOCS_DIR`: The default output directory for documentation
+
+## Generated Files
+
+### Package Structure
+
+When creating a new package, the following files and directories are generated:
+
+```
+vendor/package/
+├── src/
+│   ├── PackageNameServiceProvider.php
+│   └── Console/
+│       └── Commands/
+├── config/
+├── database/
+├── resources/
+├── routes/
+├── tests/
+├── composer.json
+└── README.md
+```
+
+### Documentation Structure
+
+When generating documentation, the following structure is created:
+
+```
+docs/
+├── README.md
+├── controllers/
+│   └── [ControllerName].md
+├── models/
+│   └── [ModelName].md
+├── routes/
+│   └── api.md
+│   └── web.md
+└── components/
+    └── [ComponentName].md
+```
+
+## Error Handling
+
+Jolly Packager provides clear error messages for common issues:
+
+- Invalid vendor/package names
+- Existing package conflicts
+- Permission issues
+- Invalid configuration
+
+## Contributing
+
+For information about contributing to Jolly Packager, please see our [Contributing Guide](contributing.md).
 
 ## Console Commands
 

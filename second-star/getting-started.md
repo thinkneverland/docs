@@ -1,193 +1,134 @@
 # Getting Started with Second Star
 
-This guide will help you get up and running with Second Star, showing you how to install the package and generate your first tests.
+This guide will help you get started with Second Star, from installation to generating your first test.
 
 ## Installation
 
 1. Install the package via Composer:
 
 ```bash
-composer require thinkneverland/second-star --dev
+composer require thinkneverland/second-star
 ```
 
 2. Publish the configuration file:
 
 ```bash
-php artisan vendor:publish --provider="ThinkNeverland\SecondStar\SecondStarServiceProvider"
+php artisan vendor:publish --provider="ThinkNeverland\SecondStar\SecondStarServiceProvider" --tag="config"
 ```
+
+This will create a `config/secondstar.php` file where you can configure the package.
 
 ## Basic Usage
 
 ### Command Line Interface
 
-1. Generate tests for a service:
+The package provides an Artisan command to generate tests:
 
 ```bash
-php artisan test:generate UserService
+php artisan test:generate --file=app/Repositories/UserRepository.php --unit --phpunit
 ```
 
-2. Generate tests for a repository:
+#### Available Options
+
+- `--file`: The path to the file to generate tests for (required)
+- `--unit`: Generate a unit test (default: true)
+- `--feature`: Generate a feature test
+- `--phpunit`: Use PHPUnit (default: true)
+- `--pest`: Use Pest
+- `--output`: The directory to output the test to
+- `--namespace`: The namespace to use for the test
+
+#### Examples
 
 ```bash
-php artisan test:generate UserRepository --type=repository
+# Generate a unit test for a repository
+php artisan test:generate --file=app/Repositories/UserRepository.php --unit --phpunit
+
+# Generate a feature test for a service
+php artisan test:generate --file=app/Services/UserService.php --feature --phpunit
+
+# Generate a test with custom output directory
+php artisan test:generate --file=app/Repositories/UserRepository.php --unit --phpunit --output=tests/Custom
+
+# Generate a test with custom namespace
+php artisan test:generate --file=app/Services/UserService.php --unit --phpunit --namespace=Custom
 ```
 
-3. Generate Cypress tests:
+### Programmatic Usage
 
-```bash
-php artisan test:cypress-setup
-```
-
-4. Generate test coverage report:
-
-```bash
-php artisan test:coverage
-```
-
-### Configuration
-
-The configuration file `config/second-star.php` allows you to customize:
+You can also use the generators programmatically:
 
 ```php
-return [
-    'output' => [
-        'path' => 'tests',
-        'namespace' => 'Tests',
-    ],
-    'templates' => [
-        'path' => 'stubs/tests',
-    ],
-    'coverage' => [
-        'minimum' => 80,
-        'format' => 'html',
-    ],
-    'exclude' => [
-        'patterns' => [
-            '#/vendor/#',
-            '#/node_modules/#',
-        ],
-    ],
-];
+use ThinkNeverland\SecondStar\Generators\RepositoryTestGenerator;
+use ThinkNeverland\SecondStar\Generators\ServiceTestGenerator;
+
+// Generate a repository test
+$repositoryGenerator = app(RepositoryTestGenerator::class);
+$repositoryTest = $repositoryGenerator->generate(
+    app_path('Repositories/UserRepository.php'),
+    ['unit' => true, 'phpunit' => true]
+);
+
+// Generate a service test
+$serviceGenerator = app(ServiceTestGenerator::class);
+$serviceTest = $serviceGenerator->generate(
+    app_path('Services/UserService.php'),
+    ['unit' => true, 'phpunit' => true]
+);
 ```
 
-## Test Generation Examples
+## Test Generators
 
-### 1. Service Test Generation
+### Repository Test Generator
 
-When you run:
+The Repository Test Generator analyzes your repository classes and generates tests for common repository methods:
+
+- `find()`: Tests finding a single record
+- `all()`: Tests retrieving all records
+- `create()`: Tests creating new records
+- `update()`: Tests updating existing records
+- `delete()`: Tests deleting records
+- `findBy()`: Tests finding records by criteria
+- `findOrFail()`: Tests finding or failing
+- `firstOrCreate()`: Tests first or create functionality
+
+It also detects dependencies in the constructor and sets up mocks for them in the test.
+
+### Service Test Generator
+
+The Service Test Generator analyzes your service classes and generates tests for all public methods. It:
+
+- Detects method parameters and return types
+- Sets up appropriate mocks for dependencies
+- Generates test cases for success and failure scenarios
+- Handles complex method signatures
+- Supports method chaining
+
+## Customization
+
+### Custom Test Stubs
+
+You can customize the test stubs by publishing them:
 
 ```bash
-php artisan test:generate UserService
+php artisan vendor:publish --provider="ThinkNeverland\SecondStar\SecondStarServiceProvider" --tag="stubs"
 ```
 
-Second Star will:
+This will create stub files in the `resources/stubs/secondstar` directory that you can modify.
 
-1. Analyze the `UserService` class
-2. Identify dependencies and methods
-3. Generate appropriate test cases
-4. Create mocks for dependencies
+### Configuration Options
 
-Generated test will look like:
+The `config/secondstar.php` file allows you to configure:
 
-```php
-namespace Tests\Unit\Services;
-
-use Tests\TestCase;
-use App\Services\UserService;
-use Mockery;
-
-class UserServiceTest extends TestCase
-{
-    protected UserService $service;
-    
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->service = new UserService();
-    }
-    
-    /** @test */
-    public function it_can_create_user()
-    {
-        // Test implementation
-    }
-}
-```
-
-### 2. Repository Test Generation
-
-```bash
-php artisan test:generate UserRepository --type=repository
-```
-
-This will generate tests with database interactions and model factories.
-
-### 3. API Test Generation
-
-```bash
-php artisan test:generate UserController --type=api
-```
-
-Generates feature tests for your API endpoints.
-
-## Cypress Setup
-
-1. Initialize Cypress:
-
-```bash
-php artisan test:cypress-setup
-```
-
-2. This will:
-   - Install Cypress via npm
-   - Create base configuration
-   - Set up example tests
-   - Configure Laravel integration
-
-## Best Practices
-
-1. **Test Organization**
-   - Keep tests in appropriate directories
-   - Follow naming conventions
-   - Group related tests
-
-2. **Test Coverage**
-   - Aim for minimum 80% coverage
-   - Focus on critical paths
-   - Use meaningful assertions
-
-3. **Mocking**
-   - Mock external services
-   - Use factories for models
-   - Avoid over-mocking
-
-4. **Maintenance**
-   - Update tests with code changes
-   - Remove obsolete tests
-   - Keep assertions focused
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Test Generation Fails**
-   - Verify class exists and is autoloadable
-   - Check namespace configuration
-   - Ensure write permissions
-
-2. **Coverage Report Issues**
-   - Install Xdebug or PCOV
-   - Configure coverage driver
-   - Check file permissions
-
-3. **Cypress Setup Problems**
-   - Verify Node.js installation
-   - Check npm permissions
-   - Review Laravel Mix configuration
+- Default test framework (PHPUnit or Pest)
+- Default test type (unit or feature)
+- Output directory structure
+- Namespace conventions
+- Mock generation preferences
 
 ## Next Steps
 
-- Explore the [API Reference](./api-reference.md)
-- Learn about [Advanced Features](./advanced-features.md)
-- Read the [Contributing Guide](../CONTRIBUTING.md)
-- Join our community on GitHub
+- Check out the [API Reference](api-reference.md) for detailed documentation
+- Learn about [Advanced Features](advanced-features.md)
+- Review [Best Practices](best-practices.md)
+- Visit our [GitBook documentation](https://thinkneverland.gitbook.io/second-star/) for more resources
